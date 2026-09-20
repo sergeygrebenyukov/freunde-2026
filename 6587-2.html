@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Detektiv-Tabelle: Wer ist der Täter?</title>
+<style>
+    * { box-sizing: border-box; }
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+        color: #ecf0f1; 
+        padding: 20px; 
+        min-height: 100vh;
+        margin: 0;
+    }
+    .container { 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        background: #0f3460; 
+        padding: 30px; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    }
+    h1 { 
+        text-align: center; 
+        color: #f1c40f; 
+        margin-bottom: 10px;
+    }
+    .subtitle {
+        text-align: center;
+        font-style: italic;
+        margin-bottom: 25px;
+        color: #bdc3c7;
+    }
+    .instructions {
+        background: #16213e;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #f1c40f;
+    }
+    .instructions ol { margin: 5px 0 0 20px; }
+    .instructions li { margin: 5px 0; }
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        background: #16213e; 
+        border-radius: 10px; 
+        overflow: hidden;
+    }
+    th, td { 
+        padding: 12px; 
+        text-align: center; 
+        border: 1px solid #34495e; 
+        position: relative;
+    }
+    th { 
+        background: #e94560; 
+        color: white; 
+        font-size: 1.05em;
+    }
+    td:first-child { 
+        background: #2c3e50; 
+        font-weight: bold;
+        text-align: left;
+    }
+    .witness-col { 
+        background: #1e4d6b; 
+        font-weight: bold;
+        color: #f1c40f;
+    }
+    select { 
+        padding: 10px; 
+        font-size: 1.25em; 
+        font-weight: bold;
+        border-radius: 5px; 
+        border: 2px solid #3498db; 
+        background: #fff; 
+        color: #2c3e50; 
+        cursor: pointer;
+        width: 100%;
+        min-width: 150px;
+    }
+    select:focus { outline: none; border-color: #f1c40f; }
+    .cell-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+    .match-icon {
+        font-size: 1.5em;
+        font-weight: bold;
+        display: none;
+    }
+    .match-icon.show { display: block; }
+    .match-yes { color: #2ecc71; }
+    .match-no { color: #e74c3c; }
+    
+    .correct-cell { background: #27ae60 !important; }
+    .correct-cell select {
+        background: #2ecc71;
+        color: white;
+        font-weight: bold;
+        border-color: #27ae60;
+    }
+    .wrong-cell { background: #c0392b !important; }
+    .wrong-cell select {
+        background: #e74c3c;
+        color: white;
+        font-weight: bold;
+        border-color: #c0392b;
+    }
+    .controls { 
+        text-align: center; 
+        margin-top: 25px; 
+    }
+    button { 
+        padding: 15px 40px; 
+        font-size: 1.2em; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        background: #f1c40f; 
+        color: #2c3e50; 
+        font-weight: bold;
+        margin: 5px;
+        transition: 0.3s;
+    }
+    button:hover { background: #f39c12; transform: scale(1.05); }
+    .reset-btn { background: #95a5a6; color: white; }
+    .reset-btn:hover { background: #7f8c8d; }
+    .result { 
+        margin-top: 25px; 
+        padding: 20px; 
+        border-radius: 10px; 
+        text-align: center; 
+        font-size: 1.3em; 
+        font-weight: bold;
+        display: none;
+    }
+    .result.show { display: block; }
+    .result.success { background: #27ae60; color: white; }
+    .result.partial { background: #e67e22; color: white; }
+    .legend {
+        margin-top: 20px;
+        padding: 15px;
+        background: #16213e;
+        border-radius: 8px;
+        font-size: 0.95em;
+    }
+    .legend-item { display: inline-block; margin: 5px 15px; }
+    .legend-box { 
+        display: inline-block; 
+        width: 20px; 
+        height: 20px; 
+        margin-right: 5px; 
+        vertical-align: middle;
+        border-radius: 3px;
+    }
+    .score-box {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 1.2em;
+        color: #f1c40f;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🕵️‍♂️ Fall: Der Blaue Diamant 💎</h1>
+    <p class="subtitle">Vergleichen Sie die Kleidung der Verdächtigen mit der Zeugenaussage!</p>
+
+    <div class="instructions">
+        <strong>📋 Anleitung:</strong>
+        <ol>
+            <li>Schauen Sie auf die Bilder der Verdächtigen und <b>wählen Sie die richtige Kleidung</b> für jeden Verdächtigen.</li>
+            <li>Klicken Sie auf <b>„Prüfen"</b> — das Programm zeigt, ob Sie richtig liegen.</li>
+            <li>Das Zeichen <b style="color:#2ecc71;">✓</b> bedeutet: Die Kleidung <b>passt</b> zur Zeugenaussage.</li>
+            <li>Das Zeichen <b style="color:#e74c3c;">✗</b> bedeutet: Die Kleidung <b>passt NICHT</b> zur Zeugenaussage.</li>
+            <li>Wer hat 6 ✓? Das ist der Täter!</li>
+        </ol>
+    </div>
+
+    <table id="mainTable">
+        <thead>
+            <tr>
+                <th>Kleidungsstück</th>
+                <th>Zeugenaussage<br>(Herr Friedrich)</th>
+                <th>Herr Fischer</th>
+                <th>Herr Schmidt</th>
+                <th>Herr Vance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>🧥 Mantel</td>
+                <td class="witness-col">dunkelblau, Samt</td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="rot, Wolle" data-witness="dunkelblau, Samt">
+                            <option value="">-- wählen --</option>
+                            <option value="rot, Wolle">rot, Wolle</option>
+                            <option value="dunkelblau, Samt">dunkelblau, Samt</option>
+                            <option value="grün, Baumwolle">grün, Baumwolle</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="dunkelblau, Samt" data-witness="dunkelblau, Samt">
+                            <option value="">-- wählen --</option>
+                            <option value="rot, Wolle">rot, Wolle</option>
+                            <option value="dunkelblau, Samt">dunkelblau, Samt</option>
+                            <option value="grün, Baumwolle">grün, Baumwolle</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="grün, Baumwolle" data-witness="dunkelblau, Samt">
+                            <option value="">-- wählen --</option>
+                            <option value="rot, Wolle">rot, Wolle</option>
+                            <option value="dunkelblau, Samt">dunkelblau, Samt</option>
+                            <option value="grün, Baumwolle">grün, Baumwolle</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>👔 Hemd</td>
+                <td class="witness-col">weiß</td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="blau" data-witness="weiß">
+                            <option value="">-- wählen --</option>
+                            <option value="weiß">weiß</option>
+                            <option value="blau">blau</option>
+                            <option value="gelb">gelb</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="weiß" data-witness="weiß">
+                            <option value="">-- wählen --</option>
+                            <option value="weiß">weiß</option>
+                            <option value="blau">blau</option>
+                            <option value="gelb">gelb</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="gelb" data-witness="weiß">
+                            <option value="">-- wählen --</option>
+                            <option value="weiß">weiß</option>
+                            <option value="blau">blau</option>
+                            <option value="gelb">gelb</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>🎀 Krawatte</td>
+                <td class="witness-col">rot</td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="blau" data-witness="rot">
+                            <option value="">-- wählen --</option>
+                            <option value="rot">rot</option>
+                            <option value="blau">blau</option>
+                            <option value="grün">grün</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="rot" data-witness="rot">
+                            <option value="">-- wählen --</option>
+                            <option value="rot">rot</option>
+                            <option value="blau">blau</option>
+                            <option value="grün">grün</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="grün" data-witness="rot">
+                            <option value="">-- wählen --</option>
+                            <option value="rot">rot</option>
+                            <option value="blau">blau</option>
+                            <option value="grün">grün</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>👖 Hose</td>
+                <td class="witness-col">schwarz</td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="braun" data-witness="schwarz">
+                            <option value="">-- wählen --</option>
+                            <option value="schwarz">schwarz</option>
+                            <option value="braun">braun</option>
+                            <option value="grau">grau</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="schwarz" data-witness="schwarz">
+                            <option value="">-- wählen --</option>
+                            <option value="schwarz">schwarz</option>
+                            <option value="braun">braun</option>
+                            <option value="grau">grau</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="grau" data-witness="schwarz">
+                            <option value="">-- wählen --</option>
+                            <option value="schwarz">schwarz</option>
+                            <option value="braun">braun</option>
+                            <option value="grau">grau</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>👞 Schuhe</td>
+                <td class="witness-col">braune Lederstiefel</td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="schwarze Schuhe" data-witness="braune Lederstiefel">
+                            <option value="">-- wählen --</option>
+                            <option value="braune Lederstiefel">braune Lederstiefel</option>
+                            <option value="schwarze Schuhe">schwarze Schuhe</option>
+                            <option value="rote Stiefel">rote Stiefel</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="braune Lederstiefel" data-witness="braune Lederstiefel">
+                            <option value="">-- wählen --</option>
+                            <option value="braune Lederstiefel">braune Lederstiefel</option>
+                            <option value="schwarze Schuhe">schwarze Schuhe</option>
+                            <option value="rote Stiefel">rote Stiefel</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="rote Stiefel" data-witness="braune Lederstiefel">
+                            <option value="">-- wählen --</option>
+                            <option value="braune Lederstiefel">braune Lederstiefel</option>
+                            <option value="schwarze Schuhe">schwarze Schuhe</option>
+                            <option value="rote Stiefel">rote Stiefel</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>🎩 Hut</td>
+                <td class="witness-col">schwarz, Fedora</td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="braun" data-witness="schwarz, Fedora">
+                            <option value="">-- wählen --</option>
+                            <option value="schwarz, Fedora">schwarz, Fedora</option>
+                            <option value="braun">braun</option>
+                            <option value="weiß">weiß</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="schwarz, Fedora" data-witness="schwarz, Fedora">
+                            <option value="">-- wählen --</option>
+                            <option value="schwarz, Fedora">schwarz, Fedora</option>
+                            <option value="braun">braun</option>
+                            <option value="weiß">weiß</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="cell-content">
+                        <select data-correct="weiß" data-witness="schwarz, Fedora">
+                            <option value="">-- wählen --</option>
+                            <option value="schwarz, Fedora">schwarz, Fedora</option>
+                            <option value="braun">braun</option>
+                            <option value="weiß">weiß</option>
+                        </select>
+                        <span class="match-icon"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr style="background:#2c3e50; font-weight:bold;">
+                <td>🎯 ERGEBNIS</td>
+                <td class="witness-col">—</td>
+                <td id="result-fischer">?</td>
+                <td id="result-schmidt">?</td>
+                <td id="result-vance">?</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="score-box" id="scoreBox"></div>
+
+    <div class="controls">
+        <button onclick="checkAnswers()">✅ Prüfen</button>
+        <button class="reset-btn" onclick="resetTable()">🔄 Zurücksetzen</button>
+    </div>
+
+    <div class="result" id="resultBox"></div>
+
+    <div class="legend">
+        <strong>Legende:</strong><br>
+        <span class="legend-item"><span class="legend-box" style="background:#27ae60;"></span> Richtige Kleidung erkannt</span>
+        <span class="legend-item"><span class="legend-box" style="background:#c0392b;"></span> Falsche Kleidung gewählt</span><br>
+        <span class="legend-item"><span style="color:#2ecc71; font-size:1.3em;">✓</span> Passt zur Zeugenaussage</span>
+        <span class="legend-item"><span style="color:#e74c3c; font-size:1.3em;">✗</span> Passt NICHT zur Zeugenaussage</span>
+    </div>
+</div>
+
+<script>
+function checkAnswers() {
+    const selects = document.querySelectorAll('select');
+    let allFilled = true;
+    let fischerMatch = 0, schmidtMatch = 0, vanceMatch = 0;
+    let fischerCorrect = 0, schmidtCorrect = 0, vanceCorrect = 0;
+
+    document.querySelectorAll('td').forEach(td => {
+        td.classList.remove('correct-cell', 'wrong-cell');
+    });
+    document.querySelectorAll('.match-icon').forEach(icon => {
+        icon.classList.remove('show', 'match-yes', 'match-no');
+        icon.innerText = '';
+    });
+
+    selects.forEach(sel => {
+        const cellContent = sel.parentElement;
+        const cell = cellContent.parentElement;
+        const matchIcon = cellContent.querySelector('.match-icon');
+        
+        if (sel.value === '') {
+            allFilled = false;
+            return;
+        }
+        
+        const correctValue = sel.getAttribute('data-correct');
+        const witnessValue = sel.getAttribute('data-witness');
+        const tdIndex = Array.from(cell.parentElement.children).indexOf(cell);
+        
+        if (sel.value === correctValue) {
+            cell.classList.add('correct-cell');
+            if (tdIndex === 2) fischerCorrect++;
+            if (tdIndex === 3) schmidtCorrect++;
+            if (tdIndex === 4) vanceCorrect++;
+        } else {
+            cell.classList.add('wrong-cell');
+        }
+        
+        if (matchIcon) {
+            matchIcon.classList.add('show');
+            
+            // ИСПРАВЛЕННАЯ ЛОГИКА:
+            // ✓ показывается ТОЛЬКО если ученик правильно определил одежду И она совпадает с показаниями
+            if (sel.value === correctValue && sel.value === witnessValue) {
+                matchIcon.classList.add('match-yes');
+                matchIcon.innerText = '✓';
+                if (tdIndex === 2) fischerMatch++;
+                if (tdIndex === 3) schmidtMatch++;
+                if (tdIndex === 4) vanceMatch++;
+            } else {
+                matchIcon.classList.add('match-no');
+                matchIcon.innerText = '✗';
+            }
+        }
+    });
+
+    if (!allFilled) {
+        alert('⚠️ Bitte füllen Sie ALLE Felder aus!');
+        return;
+    }
+
+    const totalCorrect = fischerCorrect + schmidtCorrect + vanceCorrect;
+    document.getElementById('scoreBox').innerHTML = 
+        `📊 Richtige Antworten: <b>${totalCorrect}/18</b> | 
+        Fischer: ${fischerCorrect}/6 | Schmidt: ${schmidtCorrect}/6 | Vance: ${vanceCorrect}/6`;
+
+    const fischerCell = document.getElementById('result-fischer');
+    const schmidtCell = document.getElementById('result-schmidt');
+    const vanceCell = document.getElementById('result-vance');
+    
+    fischerCell.innerHTML = `${fischerMatch}/6 ✓<br><small>zur Zeugenaussage</small>`;
+    schmidtCell.innerHTML = `${schmidtMatch}/6 ✓<br><small>zur Zeugenaussage</small>`;
+    vanceCell.innerHTML = `${vanceMatch}/6 ✓<br><small>zur Zeugenaussage</small>`;
+
+    [
+        {cell: fischerCell, matches: fischerMatch, correct: fischerCorrect},
+        {cell: schmidtCell, matches: schmidtMatch, correct: schmidtCorrect},
+        {cell: vanceCell, matches: vanceMatch, correct: vanceCorrect}
+    ].forEach(item => {
+        if (item.correct === 6 && item.matches === 6) {
+            item.cell.style.background = '#27ae60';
+        } else if (item.correct === 6) {
+            item.cell.style.background = '#34495e';
+        } else {
+            item.cell.style.background = '#c0392b';
+        }
+        item.cell.style.color = 'white';
+        item.cell.style.padding = '12px';
+    });
+
+    const resultBox = document.getElementById('resultBox');
+    resultBox.classList.add('show');
+    
+    if (schmidtMatch === 6 && fischerMatch < 6 && vanceMatch < 6 && 
+        fischerCorrect === 6 && schmidtCorrect === 6 && vanceCorrect === 6) {
+        resultBox.className = 'result show success';
+        resultBox.innerHTML = '🏆 FANTASTISCH, DETEKTIVE! 🏆<br><br>' +
+            'Sie haben alle Verdächtigen richtig beschrieben!<br>' +
+            'Der Täter ist <b>Herr Schmidt</b>!<br>' +
+            'Er trägt genau die Kleidung, die Herr Friedrich beschrieben hat.<br><br>' +
+            '👮‍♂️🔗💎';
+    } else {
+        resultBox.className = 'result show partial';
+        resultBox.innerHTML = '🤔 Hmm... Schauen Sie noch einmal genau!<br><br>' +
+            'Welcher Verdächtige hat <b>6 ✓</b> bei der Übereinstimmung mit der Zeugenaussage?<br>' +
+            'Tipp: Zuerst die Kleidung richtig erkennen, dann mit der Aussage vergleichen.';
+    }
+}
+
+function resetTable() {
+    document.querySelectorAll('select').forEach(sel => sel.value = '');
+    document.querySelectorAll('td').forEach(td => {
+        td.classList.remove('correct-cell', 'wrong-cell');
+    });
+    document.querySelectorAll('.match-icon').forEach(icon => {
+        icon.classList.remove('show', 'match-yes', 'match-no');
+        icon.innerText = '';
+    });
+    ['fischer', 'schmidt', 'vance'].forEach(name => {
+        const cell = document.getElementById('result-' + name);
+        cell.innerHTML = '?';
+        cell.style.background = '';
+        cell.style.color = '';
+    });
+    document.getElementById('resultBox').classList.remove('show');
+    document.getElementById('scoreBox').innerHTML = '';
+}
+</script>
+
+</body>
+</html>

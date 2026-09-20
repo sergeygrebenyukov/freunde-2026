@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Los 3 — Das geheimnisvolle Gemälde</title>
+<style>
+:root{
+  --ink:#0c0d10; --panel:#171a21; --line:#2c313e;
+  --red:#e14b3b; --yellow:#eac531; --brass:#c9a94e; --ok:#5fce7f;
+  --display:Impact,'Haettenschweiler','Arial Narrow Bold',sans-serif;
+  --body:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
+  --mono:'Courier New',Courier,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--body);color:#e8e4da;min-height:100vh;display:flex;flex-direction:column;
+  background:
+    radial-gradient(900px 500px at 50% -10%, rgba(232,197,71,.08), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 2px, transparent 2px 7px),
+    var(--ink);}
+.tape{height:12px;background:repeating-linear-gradient(45deg,var(--yellow) 0 16px,#141414 16px 32px)}
+.wrap{max-width:760px;margin:0 auto;padding:34px 18px 60px;text-align:center;flex:1}
+.lotnr{font-family:var(--display);letter-spacing:.3em;color:var(--red);font-size:14px;margin-bottom:20px}
+.sub{font-size:15px;color:#d7d3c8;max-width:560px;margin:0 auto 26px;line-height:1.6}
+.sub b{color:#f0ead8}
+/* ---------- painting ---------- */
+.paintwrap{width:min(420px,92%);margin:0 auto;filter:drop-shadow(0 18px 26px rgba(0,0,0,.6))}
+.pframe{position:relative;padding:34px;border-radius:6px;cursor:default;
+  background:linear-gradient(145deg,#e2bd63,#9a7a26 55%,#c9a545);
+  box-shadow:inset 0 0 0 3px rgba(90,66,20,.6),inset 0 2px 0 rgba(255,255,255,.35)}
+.pframe.inspect{cursor:pointer;animation:framePulse 1.2s infinite}
+@keyframes framePulse{
+  0%,100%{box-shadow:inset 0 0 0 3px rgba(90,66,20,.6),0 0 0 0 rgba(234,197,49,.7)}
+  50%{box-shadow:inset 0 0 0 3px rgba(90,66,20,.6),0 0 0 14px rgba(234,197,49,0)}}
+.part{display:block;background:#0c141c;border:2px solid #5c4716}
+.part svg{width:100%;height:auto;display:block}
+.fach{position:absolute;left:50%;bottom:7px;transform:translateX(-50%);width:120px;height:20px;background:#241a08;border-radius:3px;z-index:3}
+.flap{position:absolute;inset:0;background:linear-gradient(#d3ac4e,#8a6a1f);border-radius:3px;transform-origin:top;transition:transform .9s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.fach.open .flap{transform:rotateX(168deg)}
+.minicard{position:absolute;left:50%;bottom:4px;width:84px;height:48px;margin-left:-42px;background:#f6efdc;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:13px;color:#3a2f1c;letter-spacing:.06em;
+  transition:transform 1s .5s;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.fach.open .minicard{transform:translateY(-78px) rotate(-7deg)}
+.hint{margin-top:18px;font-family:var(--mono);font-size:14px;color:var(--yellow);min-height:22px}
+/* ---------- card reveal ---------- */
+.cardsec{margin-top:34px;opacity:0;transform:translateY(26px);transition:.7s;pointer-events:none}
+.cardsec.show{opacity:1;transform:none;pointer-events:auto}
+.vcard{width:min(440px,100%);margin:0 auto;background:linear-gradient(160deg,#f7f1de,#eadfbd);color:#2c2416;border-radius:8px;
+  padding:26px 28px;position:relative;box-shadow:0 18px 40px rgba(0,0,0,.55);transform:rotate(-1deg);text-align:left}
+.vcard::before{content:"";position:absolute;inset:8px;border:1px solid rgba(120,90,30,.35);border-radius:5px;pointer-events:none}
+.vname{font-family:Georgia,'Times New Roman',serif;font-size:30px;letter-spacing:.06em;color:#1e1a10}
+.vline{height:2px;background:linear-gradient(90deg,var(--red),transparent);margin:10px 0 12px}
+.vjob{font-size:14px;font-style:italic;color:#5c4a26;margin-bottom:12px}
+.vaddr{font-family:var(--mono);font-size:14px;line-height:1.7;color:#3a2f1c}
+/* controls */
+.ctrl{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{border:none;border-radius:999px;padding:9px 18px;font-weight:800;font-size:13px;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:#c9cdd6}
+.btn.ghost:hover{border-color:var(--brass);color:#f0ead8}
+footer{padding:0 16px 26px;color:#6b7280;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="tape"></div>
+<div class="wrap">
+  <div class="lotnr">LOS 3 · DAS GEHEIMNISVOLLE GEMÄLDE</div>
+  <p class="sub">Aber — Moment! Schauen Sie sich den Rahmen an! Er ist <b>neu und sehr dick</b>. Sehr seltsam für ein altes Gemälde …</p>
+
+  <div class="paintwrap">
+    <div class="pframe inspect" id="pframe">
+      <div class="part">
+        <svg viewBox="0 0 300 220">
+          <defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#243a4d"/><stop offset="100%" stop-color="#0b1118"/></linearGradient></defs>
+          <rect width="300" height="220" fill="url(#sk)"/>
+          <circle cx="238" cy="44" r="20" fill="#e8e2c8" opacity=".85"/>
+          <ellipse cx="150" cy="205" rx="190" ry="42" fill="#0a1a12"/>
+          <g fill="#0e2419"><polygon points="30,205 62,90 94,205"/><polygon points="120,208 158,60 196,208"/><polygon points="212,206 244,104 276,206"/></g>
+          <g fill="#123024" opacity=".9"><polygon points="70,208 100,120 130,208"/><polygon points="176,208 204,132 232,208"/></g>
+          <ellipse cx="150" cy="196" rx="170" ry="18" fill="#22384a" opacity=".28"/>
+        </svg>
+      </div>
+      <div class="fach" id="fach"><div class="minicard">V.&nbsp;VANCE</div><div class="flap"></div></div>
+    </div>
+  </div>
+  <div class="hint" id="hint">🔍 Klicken Sie auf den Rahmen!</div>
+
+  <div class="cardsec" id="cardsec">
+    <div class="vcard">
+      <div class="vname">Victor Vance</div>
+      <div class="vline"></div>
+      <div class="vjob">Exklusive Antiquitäten und Kunst</div>
+      <div class="vaddr">„Hafenstraße 13, 10115 Berlin“<br>Tel.: 030-12345678</div>
+    </div>
+  </div>
+
+  <div class="ctrl">
+    <button class="btn ghost" id="resetBtn">↺ Noch einmal</button>
+    <button class="btn ghost" id="sndBtn">🔊 Ton an</button>
+  </div>
+</div>
+<footer>Detektiv-Quest · Lektion 4 · Fundszene: der Rahmen des Gemäldes</footer>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+let isOpen=false, muted=false, revealTimer=null;
+const FX={ctx:null,
+ ready(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();},
+ beep(f=880,d=.08,type='sine',g=.05,delay=0,slide){if(muted||!this.ctx)return;const t=this.ctx.currentTime+delay,o=this.ctx.createOscillator(),v=this.ctx.createGain();
+   o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);
+   v.gain.setValueAtTime(g,t);v.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(v);v.connect(this.ctx.destination);o.start(t);o.stop(t+d+.03);},
+ reveal(){this.beep(180,.7,'sine',.06,0,720);this.beep(90,.5,'triangle',.05,.15);this.beep(1200,.12,'triangle',.05,.9);},
+ click(){this.beep(1400,.05,'square',.03)}};
+document.addEventListener('pointerdown',()=>FX.ready());
+
+$('#pframe').addEventListener('click',()=>{
+  if(isOpen)return;
+  isOpen=true;
+  $('#pframe').classList.remove('inspect');
+  $('#fach').classList.add('open');
+  FX.reveal();
+  $('#hint').textContent='Ein kleines Fach im Rahmen! Und — was ist das? Eine Visitenkarte!';
+  revealTimer=setTimeout(()=>{
+    $('#cardsec').classList.add('show');
+    $('#cardsec').scrollIntoView({behavior:'smooth',block:'center'});
+  },1500);
+});
+$('#resetBtn').addEventListener('click',()=>{
+  if(revealTimer){clearTimeout(revealTimer);revealTimer=null;}
+  isOpen=false;
+  $('#fach').classList.remove('open');
+  $('#cardsec').classList.remove('show');
+  $('#pframe').classList.add('inspect');
+  $('#hint').textContent='🔍 Klicken Sie auf den Rahmen!';
+  FX.click();
+});
+$('#sndBtn').addEventListener('click',()=>{muted=!muted;$('#sndBtn').textContent=muted?'🔇 Ton aus':'🔊 Ton an';});
+</script>
+</body>
+</html>

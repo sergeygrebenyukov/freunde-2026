@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Room — Der digitale Safe</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Georgia', serif;
+        background: radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d1a 100%);
+        min-height: 100vh;
+        padding: 30px 20px;
+        color: #e8e8e8;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    .header {
+        text-align: center;
+        background: linear-gradient(135deg, #2d2d44 0%, #1f1f35 100%);
+        border: 2px solid #c9a227;
+        border-radius: 15px;
+        padding: 35px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    .header h1 {
+        color: #c9a227;
+        font-size: 2.2em;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .header .subtitle {
+        color: #a0a0b8;
+        font-size: 1.15em;
+        font-style: italic;
+        margin-bottom: 18px;
+    }
+
+    .badge {
+        display: inline-block;
+        background: #c9a227;
+        color: #1a1a2e;
+        padding: 6px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .intro {
+        background: rgba(201,162,39,0.1);
+        border-left: 5px solid #c9a227;
+        padding: 20px 25px;
+        margin-bottom: 30px;
+        border-radius: 0 12px 12px 0;
+        line-height: 1.7;
+        font-size: 1.1em;
+    }
+
+    .intro .teacher { color: #c9a227; font-weight: bold; }
+
+    .puzzles {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        margin-bottom: 35px;
+    }
+
+    @media (max-width: 700px) {
+        .puzzles { grid-template-columns: 1fr; }
+    }
+
+    .puzzle-card {
+        background: linear-gradient(135deg, #252540 0%, #1e1e35 100%);
+        border: 2px solid #3a3a55;
+        border-radius: 14px;
+        padding: 22px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .puzzle-card:hover {
+        border-color: #c9a227;
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(201,162,39,0.2);
+    }
+
+    .puzzle-card.solved {
+        border-color: #2ecc71;
+        box-shadow: 0 0 20px rgba(46,204,113,0.25);
+    }
+
+    .puzzle-number {
+        display: inline-block;
+        background: #c9a227;
+        color: #1a1a2e;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        line-height: 36px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .puzzle-question {
+        font-size: 1.12em;
+        color: #fff;
+        margin-bottom: 16px;
+        line-height: 1.5;
+        min-height: 50px;
+    }
+
+    .puzzle-image {
+        background: #141425;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 16px;
+        border: 1px solid #3a3a55;
+    }
+
+    .puzzle-image svg { width: 100%; height: auto; display: block; }
+
+    .digit-input {
+        width: 70px;
+        height: 55px;
+        text-align: center;
+        font-size: 2em;
+        font-family: inherit;
+        font-weight: bold;
+        background: #141425;
+        border: 2px solid #3a3a55;
+        border-radius: 10px;
+        color: #c9a227;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .digit-input:focus { border-color: #c9a227; box-shadow: 0 0 12px rgba(201,162,39,0.4); }
+    .digit-input.correct { border-color: #2ecc71; color: #2ecc71; }
+    .digit-input.wrong { border-color: #e74c3c; color: #e74c3c; animation: shake 0.4s; }
+    .digit-input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+
+    .digit-label {
+        display: block;
+        margin-top: 10px;
+        color: #a0a0b8;
+        font-size: 0.9em;
+    }
+
+    .safe-section {
+        background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+        border: 2px solid #c9a227;
+        border-radius: 15px;
+        padding: 35px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .safe-title {
+        color: #c9a227;
+        font-size: 1.5em;
+        margin-bottom: 25px;
+        letter-spacing: 1px;
+    }
+
+    .safe-display {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .safe-slot {
+        width: 65px; height: 80px;
+        background: #0a0a12;
+        border: 2px solid #c9a227;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #c9a227;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+    }
+
+    .btn {
+        padding: 15px 45px;
+        font-size: 1.2em;
+        font-family: inherit;
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        margin: 5px;
+    }
+
+    .btn-open {
+        background: linear-gradient(135deg, #c9a227, #a8861e);
+        color: #1a1a2e;
+        box-shadow: 0 5px 20px rgba(201,162,39,0.4);
+    }
+
+    .btn-open:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(201,162,39,0.6); }
+    .btn-open:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-reset {
+        background: transparent;
+        color: #c9a227;
+        border: 2px solid #c9a227;
+    }
+
+    .btn-reset:hover { background: rgba(201,162,39,0.15); }
+
+    .safe-message {
+        margin-top: 25px;
+        font-size: 1.15em;
+        min-height: 30px;
+        font-weight: bold;
+    }
+
+    .safe-message.error { color: #e74c3c; }
+    .safe-message.success { color: #2ecc71; }
+
+    .diamond-reveal {
+        display: none;
+        text-align: center;
+        background: linear-gradient(135deg, #2d2d44, #1a1a2e);
+        border: 2px solid #c9a227;
+        border-radius: 15px;
+        padding: 45px;
+        animation: fadeIn 1s ease;
+    }
+
+    .diamond-reveal.show { display: block; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .diamond-icon {
+        font-size: 5em;
+        animation: glow 2s ease-in-out infinite;
+        display: inline-block;
+    }
+
+    @keyframes glow {
+        0%, 100% { filter: drop-shadow(0 0 10px #4fc3f7); }
+        50% { filter: drop-shadow(0 0 30px #4fc3f7); }
+    }
+
+    .diamond-reveal h2 {
+        color: #c9a227;
+        font-size: 2em;
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>🔐 Escape Room</h1>
+        <div class="subtitle">Der digitale Safe</div>
+        <div class="badge">🕵️ Fall: Der Diebstahl im Grandhotel</div>
+    </div>
+
+    <div class="intro">
+        <span class="teacher">Lehrer:</span> „Aber bevor wir den Täter verhaften können,
+        müssen wir den <strong>Blauen Diamanten</strong> finden. Der Täter hat ihn in einem
+        digitalen Safe versteckt. Um den Safe zu öffnen, brauchen wir einen
+        <strong>4-stelligen Code</strong>. Die Hinweise sind hier! Lösen Sie die 4 Rätsel!"
+    </div>
+
+    <div class="puzzles">
+
+        <!-- ЗАГАДКА 1: чемоданы (2 штуки) -->
+        <div class="puzzle-card" id="card1">
+            <span class="puzzle-number">1</span>
+            <div class="puzzle-question">Wie viele Koffer stehen in der Hotellobby?</div>
+            <div class="puzzle-image">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="110" width="200" height="30" fill="#2a2a3e"/>
+                    <line x1="0" y1="110" x2="200" y2="110" stroke="#3a3a55" stroke-width="2"/>
+                    <g stroke="#5d4037" stroke-width="2">
+                        <rect x="32" y="52" width="58" height="58" rx="7" fill="#8d6e63"/>
+                        <rect x="52" y="42" width="18" height="12" rx="5" fill="none" stroke-width="3"/>
+                        <line x1="46" y1="52" x2="46" y2="110" stroke-width="3"/>
+                        <line x1="76" y1="52" x2="76" y2="110" stroke-width="3"/>
+                    </g>
+                    <g stroke="#1a237e" stroke-width="2">
+                        <rect x="110" y="63" width="52" height="47" rx="7" fill="#3949ab"/>
+                        <rect x="127" y="54" width="16" height="11" rx="5" fill="none" stroke-width="3"/>
+                        <line x1="123" y1="63" x2="123" y2="110" stroke-width="3"/>
+                        <line x1="149" y1="63" x2="149" y2="110" stroke-width="3"/>
+                    </g>
+                    <text x="61" y="34" text-anchor="middle" fill="#c9a227" font-size="9">Koffer 1</text>
+                    <text x="136" y="46" text-anchor="middle" fill="#c9a227" font-size="9">Koffer 2</text>
+                    <text x="100" y="132" text-anchor="middle" fill="#999" font-size="9">Hotellobby</text>
+                </svg>
+            </div>
+            <input type="text" maxlength="1" class="digit-input" id="digit1" inputmode="numeric" autocomplete="off" aria-label="Ziffer 1">
+            <span class="digit-label">1. Ziffer</span>
+        </div>
+
+        <!-- ЗАГАДКА 2: отпечатки (3 штуки) -->
+        <div class="puzzle-card" id="card2">
+            <span class="puzzle-number">2</span>
+            <div class="puzzle-question">Wie viele Fingerabdrücke sehen Sie auf dem Glas?</div>
+            <div class="puzzle-image">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="30" y="15" width="140" height="110" rx="6" fill="none" stroke="#90caf9" stroke-width="3"/>
+                    <line x1="45" y1="25" x2="60" y2="115" stroke="#90caf9" stroke-width="1" opacity="0.3"/>
+                    <g transform="translate(65,45)">
+                        <ellipse cx="0" cy="0" rx="13" ry="17" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <ellipse cx="0" cy="0" rx="9" ry="12" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <ellipse cx="0" cy="0" rx="5" ry="7" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                    </g>
+                    <g transform="translate(115,75)">
+                        <ellipse cx="0" cy="0" rx="13" ry="17" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <ellipse cx="0" cy="0" rx="9" ry="12" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <ellipse cx="0" cy="0" rx="5" ry="7" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                    </g>
+                    <g transform="translate(145,35)">
+                        <ellipse cx="0" cy="0" rx="13" ry="17" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <ellipse cx="0" cy="0" rx="9" ry="12" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                        <ellipse cx="0" cy="0" rx="5" ry="7" fill="none" stroke="#e0e0e0" stroke-width="1.5"/>
+                    </g>
+                    <text x="100" y="138" text-anchor="middle" fill="#999" font-size="9">Spurensicherung</text>
+                </svg>
+            </div>
+            <input type="text" maxlength="1" class="digit-input" id="digit2" inputmode="numeric" autocomplete="off" aria-label="Ziffer 2">
+            <span class="digit-label">2. Ziffer</span>
+        </div>
+
+        <!-- ЗАГАДКА 3: часы (квадрат = 4 угла) -->
+        <div class="puzzle-card" id="card3">
+            <span class="puzzle-number">3</span>
+            <div class="puzzle-question">Welche Form hat die Uhr? Wie viele Ecken hat diese Form?</div>
+            <div class="puzzle-image">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="60" y="25" width="80" height="80" rx="6" fill="#263238" stroke="#c9a227" stroke-width="3"/>
+                    <circle cx="100" cy="65" r="28" fill="#eceff1"/>
+                    <text x="100" y="44" text-anchor="middle" fill="#263238" font-size="8">12</text>
+                    <text x="122" y="68" text-anchor="middle" fill="#263238" font-size="8">3</text>
+                    <text x="100" y="90" text-anchor="middle" fill="#263238" font-size="8">6</text>
+                    <text x="79" y="68" text-anchor="middle" fill="#263238" font-size="8">9</text>
+                    <line x1="100" y1="65" x2="100" y2="47" stroke="#263238" stroke-width="3"/>
+                    <line x1="100" y1="65" x2="114" y2="70" stroke="#263238" stroke-width="2"/>
+                    <circle cx="100" cy="65" r="3" fill="#c9a227"/>
+                    <circle cx="60" cy="25" r="4" fill="#e74c3c"/>
+                    <circle cx="140" cy="25" r="4" fill="#e74c3c"/>
+                    <circle cx="60" cy="105" r="4" fill="#e74c3c"/>
+                    <circle cx="140" cy="105" r="4" fill="#e74c3c"/>
+                    <text x="100" y="125" text-anchor="middle" fill="#999" font-size="9">Die Uhr im Grandhotel</text>
+                </svg>
+            </div>
+            <input type="text" maxlength="1" class="digit-input" id="digit3" inputmode="numeric" autocomplete="off" aria-label="Ziffer 3">
+            <span class="digit-label">3. Ziffer</span>
+        </div>
+
+        <!-- ЗАГАДКА 4: ключи (7 штук) -->
+        <div class="puzzle-card" id="card4">
+            <span class="puzzle-number">4</span>
+            <div class="puzzle-question">Wie viele Schlüssel sehen Sie?</div>
+            <div class="puzzle-image">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="40" r="18" fill="none" stroke="#c9a227" stroke-width="4"/>
+                    <g stroke-width="1">
+                        <g transform="translate(55,60) rotate(15)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#b0bec5" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="30" fill="#b0bec5"/>
+                            <rect x="-2" y="30" width="9" height="4" fill="#b0bec5"/>
+                            <rect x="-2" y="23" width="7" height="4" fill="#b0bec5"/>
+                        </g>
+                        <g transform="translate(72,68) rotate(8)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#b0bec5" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="32" fill="#b0bec5"/>
+                            <rect x="-2" y="33" width="9" height="4" fill="#b0bec5"/>
+                        </g>
+                        <g transform="translate(90,72) rotate(3)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#b0bec5" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="34" fill="#b0bec5"/>
+                            <rect x="-2" y="35" width="9" height="4" fill="#b0bec5"/>
+                            <rect x="-2" y="27" width="7" height="4" fill="#b0bec5"/>
+                        </g>
+                        <g transform="translate(110,72) rotate(-3)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#b0bec5" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="33" fill="#b0bec5"/>
+                            <rect x="-2" y="34" width="9" height="4" fill="#b0bec5"/>
+                        </g>
+                        <g transform="translate(128,68) rotate(-8)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#b0bec5" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="31" fill="#b0bec5"/>
+                            <rect x="-2" y="32" width="9" height="4" fill="#b0bec5"/>
+                            <rect x="-2" y="24" width="7" height="4" fill="#b0bec5"/>
+                        </g>
+                        <g transform="translate(145,60) rotate(-15)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#b0bec5" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="29" fill="#b0bec5"/>
+                            <rect x="-2" y="30" width="9" height="4" fill="#b0bec5"/>
+                        </g>
+                        <g transform="translate(100,58)">
+                            <circle cx="0" cy="0" r="7" fill="none" stroke="#c9a227" stroke-width="3"/>
+                            <rect x="-2" y="7" width="4" height="36" fill="#c9a227"/>
+                            <rect x="-2" y="37" width="9" height="4" fill="#c9a227"/>
+                            <rect x="-2" y="29" width="7" height="4" fill="#c9a227"/>
+                        </g>
+                    </g>
+                    <text x="100" y="135" text-anchor="middle" fill="#999" font-size="9">Schlüsselbund des Portiers</text>
+                </svg>
+            </div>
+            <input type="text" maxlength="1" class="digit-input" id="digit4" inputmode="numeric" autocomplete="off" aria-label="Ziffer 4">
+            <span class="digit-label">4. Ziffer</span>
+        </div>
+    </div>
+
+    <div class="safe-section">
+        <div class="safe-title">🔒 Der digitale Safe — Code eingeben!</div>
+        <div class="safe-display">
+            <div class="safe-slot" id="slot1">–</div>
+            <div class="safe-slot" id="slot2">–</div>
+            <div class="safe-slot" id="slot3">–</div>
+            <div class="safe-slot" id="slot4">–</div>
+        </div>
+        <button class="btn btn-open" id="btnOpen" onclick="openSafe()">🔓 Öffnen</button>
+        <button class="btn btn-reset" onclick="resetRoom()">↺ Nochmal</button>
+        <div class="safe-message" id="message"></div>
+    </div>
+
+    <!-- БРИЛЛИАНТ: слова учителя убраны -->
+    <div class="diamond-reveal" id="diamond">
+        <span class="diamond-icon">💎</span>
+        <h2>Der Blaue Diamant!</h2>
+    </div>
+
+</div>
+
+<script>
+    // ═══ КОД СЕЙФА (измените здесь при необходимости) ═══
+    const SECRET_CODE = ['2', '3', '4', '7'];
+
+    let isOpened = false;
+
+    const inputs = [
+        document.getElementById('digit1'),
+        document.getElementById('digit2'),
+        document.getElementById('digit3'),
+        document.getElementById('digit4')
+    ];
+
+    inputs.forEach((input, i) => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            const slot = document.getElementById('slot' + (i + 1));
+            slot.textContent = e.target.value || '–';
+            if (e.target.value && i < 3) inputs[i + 1].focus();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && i > 0) {
+                inputs[i - 1].focus();
+            }
+            if (e.key === 'Enter') {
+                openSafe();
+            }
+        });
+    });
+
+    function openSafe() {
+        if (isOpened) return;
+
+        const entered = inputs.map(inp => inp.value);
+        const message = document.getElementById('message');
+        const allFilled = entered.every(d => d !== '');
+
+        if (!allFilled) {
+            message.className = 'safe-message error';
+            message.textContent = '⚠️ Bitte geben Sie alle 4 Ziffern ein!';
+            return;
+        }
+
+        let allCorrect = true;
+
+        entered.forEach((digit, i) => {
+            const input = inputs[i];
+            const card = document.getElementById('card' + (i + 1));
+
+            input.classList.remove('correct', 'wrong');
+            card.classList.remove('solved');
+            void input.offsetWidth;
+
+            if (digit === SECRET_CODE[i]) {
+                input.classList.add('correct');
+                card.classList.add('solved');
+            } else {
+                input.classList.add('wrong');
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            isOpened = true;
+            message.className = 'safe-message success';
+            message.textContent = '✅ Code richtig! Der Safe öffnet sich...';
+            document.getElementById('btnOpen').disabled = true;
+            inputs.forEach(inp => inp.disabled = true);
+            setTimeout(() => {
+                document.getElementById('diamond').classList.add('show');
+                document.getElementById('diamond').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 900);
+        } else {
+            message.className = 'safe-message error';
+            message.textContent = '❌ Falscher Code! Versuchen Sie es noch einmal!';
+        }
+    }
+
+    function resetRoom() {
+        isOpened = false;
+        inputs.forEach((input, i) => {
+            input.value = '';
+            input.disabled = false;
+            input.classList.remove('correct', 'wrong');
+            document.getElementById('slot' + (i + 1)).textContent = '–';
+            document.getElementById('card' + (i + 1)).classList.remove('solved');
+        });
+        document.getElementById('btnOpen').disabled = false;
+        document.getElementById('message').textContent = '';
+        document.getElementById('message').className = 'safe-message';
+        document.getElementById('diamond').classList.remove('show');
+        inputs[0].focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('load', () => inputs[0].focus());
+</script>
+</body>
+</html>

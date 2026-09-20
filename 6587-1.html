@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgabe 8 · Polizeibericht · Interpol Berlin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Staatliches&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e131a; --paper:#f1e7cf; --paper2:#e7d9b6; --ink:#242830; --ink-soft:#5a5f6b;
+  --tape:#f5c518; --tape-ink:#14161a; --red:#c1272d; --green:#1e7d43; --blue:#1c3f7a;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  overflow-x:hidden; min-height:100vh; padding:78px 16px 90px;
+}
+body::before{content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");}
+body::after{content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(ellipse at 50% 30%, transparent 40%, rgba(0,0,0,.55) 100%);}
+#glow{position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(340px circle at var(--x,50vw) var(--y,30vh), rgba(245,197,24,.07), transparent 65%);}
+.fp-bg{position:fixed; right:-120px; top:14%; width:560px; height:600px; z-index:0; opacity:.055;
+  color:var(--tape); animation:breathe 12s ease-in-out infinite; pointer-events:none;}
+@keyframes breathe{0%,100%{transform:scale(1) rotate(6deg)}50%{transform:scale(1.05) rotate(8deg)}}
+.dust span{position:fixed; bottom:-3vh; border-radius:50%; background:rgba(245,197,24,.5);
+  z-index:1; pointer-events:none; animation:rise linear infinite;}
+@keyframes rise{to{transform:translateY(-115vh)}}
+.tape{position:fixed; left:-3%; right:-3%; height:34px; z-index:60; overflow:hidden;
+  background:var(--tape); border-top:3px solid var(--tape-ink); border-bottom:3px solid var(--tape-ink);
+  box-shadow:0 4px 14px rgba(0,0,0,.5);}
+.tape-top{top:12px; transform:rotate(-1.1deg)}
+.tape-bottom{bottom:12px; transform:rotate(.9deg)}
+.tape-inner{display:flex; width:max-content; animation:tapeMove 26s linear infinite; height:100%; align-items:center;}
+.tape-bottom .tape-inner{animation-direction:reverse}
+.tape-inner span{white-space:nowrap; font-family:'Staatliches'; font-size:1rem; letter-spacing:.18em;
+  color:var(--tape-ink); padding-right:2.5em;}
+@keyframes tapeMove{to{transform:translateX(-50%)}}
+.desk{position:relative; z-index:5; max-width:980px; margin:0 auto;}
+.akte{position:relative; background:linear-gradient(180deg,#f5ecd7,#ecdfc0 55%,#e5d5ae);
+  padding:52px 54px 40px; box-shadow:0 32px 70px rgba(0,0,0,.6), inset 0 0 70px rgba(120,90,40,.16);}
+.akte::before{content:""; position:absolute; inset:0; pointer-events:none; opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)' opacity='0.05'/%3E%3C/svg%3E");}
+.ecke{position:absolute; width:112px; height:30px; background:linear-gradient(rgba(246,216,92,.8),rgba(228,190,58,.8));
+  box-shadow:0 2px 5px rgba(0,0,0,.28); mix-blend-mode:multiply; z-index:6;}
+.ecke.tl{top:-12px; left:26px; transform:rotate(-4deg)}
+.ecke.tr{top:-12px; right:26px; transform:rotate(3deg)}
+.ecke.bl{bottom:-12px; left:40px; transform:rotate(2deg)}
+.ecke.br{bottom:-12px; right:34px; transform:rotate(-3deg)}
+.stamp{font-family:'Staatliches'; letter-spacing:.12em; mix-blend-mode:multiply; pointer-events:none;}
+.stamp-geheim{position:absolute; top:22px; right:26px; color:var(--red); border:4px double var(--red);
+  padding:.1em .55em; font-size:1.45rem; transform:rotate(7deg); opacity:.8; z-index:7;}
+.stamp-eilt{position:absolute; top:118px; right:44px; color:#8a1c20; border:3px solid #8a1c20;
+  padding:.05em .5em; font-size:1rem; transform:rotate(-6deg); opacity:.75; z-index:7;}
+.kopf{display:flex; gap:22px; align-items:flex-start; border-bottom:4px double var(--ink); padding-bottom:20px; margin-bottom:22px;}
+.badge{flex:0 0 auto; background:var(--blue); color:#fff; text-align:center; padding:10px 14px 8px;
+  box-shadow:3px 4px 0 rgba(20,22,26,.35); transform:rotate(-1.5deg);}
+.badge b{display:block; font-family:'Staatliches'; font-size:1.5rem; letter-spacing:.1em;}
+.badge small{font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; opacity:.85;}
+.kopf h1{font-family:'Staatliches'; font-size:clamp(2.3rem,5.4vw,3.6rem); line-height:.95; letter-spacing:.04em; color:#1b1e24;}
+.kopf h1::after{content:""; display:block; width:180px; height:8px; margin-top:8px;
+  background:repeating-linear-gradient(45deg,var(--tape) 0 9px,var(--tape-ink) 9px 18px);}
+.untertitel{font-family:'Courier Prime'; font-style:italic; color:var(--ink-soft); margin-top:10px; font-size:1rem;}
+.tag-aufgabe{display:inline-block; background:var(--tape); color:var(--tape-ink); font-family:'Staatliches';
+  letter-spacing:.14em; font-size:.95rem; padding:2px 12px; margin-bottom:10px; transform:rotate(-1deg);
+  box-shadow:2px 2px 0 rgba(20,22,26,.4);}
+.meta{font-family:'Courier Prime'; background:rgba(255,252,240,.55); border:1px solid #b6a67e;
+  padding:16px 20px; margin-bottom:22px; box-shadow:inset 0 0 18px rgba(150,120,60,.12);}
+.meta-row{display:flex; gap:10px; padding:3px 0; font-size:1.02rem; align-items:baseline;}
+.m-label{flex:0 0 150px; font-family:'IBM Plex Sans'; font-weight:700; font-size:.72rem; letter-spacing:.18em; color:var(--blue); text-transform:uppercase; padding-top:4px;}
+.m-val{flex:1; font-weight:700; min-height:1.4em;}
+.m-val.typing::after{content:"▌"; color:var(--red); animation:blink .7s steps(1) infinite;}
+@keyframes blink{50%{opacity:0}}
+.status{font-family:'Staatliches'; letter-spacing:.1em; padding:1px 10px; border:2.5px solid; transform:rotate(-2deg); display:inline-block;}
+.status.offen{color:var(--red); border-color:var(--red);}
+.status.fertig{color:var(--green); border-color:var(--green); animation:stampIn .45s cubic-bezier(.2,2.4,.4,1) both;}
+.anleitung{background:linear-gradient(transparent 38%, #ffe27a 38%, #ffe27a 92%, transparent 92%);
+  font-weight:600; font-size:1.05rem; padding:2px 4px; margin-bottom:4px;}
+.anleitung small{display:block; font-weight:400; color:var(--ink-soft); font-size:.85rem; background:none;}
+.controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:18px 0 8px;}
+.chip{font-family:'Courier Prime'; font-weight:700; background:#fffaf0; border:2px solid var(--ink);
+  padding:5px 12px; box-shadow:2px 3px 0 rgba(20,22,26,.6); font-size:.95rem;}
+.chip b{color:var(--blue)}
+button.knopf{font-family:'IBM Plex Sans'; font-weight:700; font-size:.9rem; letter-spacing:.04em; cursor:pointer;
+  background:var(--tape-ink); color:var(--tape); border:2px solid var(--tape-ink); padding:8px 16px;
+  box-shadow:2px 3px 0 rgba(0,0,0,.4); transition:transform .15s, box-shadow .15s;}
+button.knopf:hover{transform:translateY(-2px) rotate(-.5deg); box-shadow:3px 5px 0 rgba(0,0,0,.45);}
+.knopf-big{font-family:'Staatliches'; font-size:1.35rem; letter-spacing:.09em; cursor:pointer;
+  background:var(--tape); color:var(--tape-ink); border:3px solid var(--tape-ink); padding:11px 30px;
+  box-shadow:4px 5px 0 rgba(20,22,26,.75); transform:rotate(-1deg);
+  transition:transform .15s, box-shadow .15s;}
+.knopf-big:hover{transform:rotate(.8deg) translateY(-3px); box-shadow:6px 8px 0 rgba(20,22,26,.75);}
+.knopf-big:focus-visible,.opt:focus-visible{outline:3px dashed var(--red); outline-offset:3px;}
+.wiederholen{text-align:center; margin:26px 0 4px;}
+.switch{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:.9rem; font-weight:600;}
+.switch input{appearance:none; width:44px; height:22px; background:#c9bc98; border:2px solid var(--ink); position:relative; cursor:pointer; transition:.2s;}
+.switch input::after{content:""; position:absolute; top:1px; left:2px; width:16px; height:16px; background:var(--ink); transition:.2s;}
+.switch input:checked{background:var(--tape)}
+.switch input:checked::after{left:22px}
+.spicker{margin:12px 0 4px;}
+.spicker summary{cursor:pointer; display:inline-block; background:#ffe97a; padding:8px 18px; font-weight:700;
+  transform:rotate(-1deg); box-shadow:3px 4px 6px rgba(0,0,0,.22); border:1px solid #d9b83a; list-style:none;}
+.spicker summary::-webkit-details-marker{display:none}
+.spicker summary::before{content:"📌 "}
+.spicker .zettel{background:#fff3b0; border:1px solid #d9b83a; padding:14px 18px; margin-top:10px;
+  transform:rotate(.6deg); box-shadow:3px 5px 8px rgba(0,0,0,.18); display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:4px 26px;
+  font-family:'Courier Prime'; font-size:.95rem;}
+.spicker .zettel b{color:var(--red)}
+.fortschritt{display:flex; align-items:center; gap:14px; margin:16px 0 6px; flex-wrap:wrap;}
+.minis{display:flex; gap:5px;}
+.mini{width:20px; height:25px; clip-path:polygon(0 100%,16% 0,84% 0,100% 100%); background:#b7ab8c;
+  display:grid; place-items:center; font-family:'Staatliches'; font-size:.72rem; color:transparent; transition:.35s;}
+.mini.on{background:var(--tape); color:var(--tape-ink); filter:drop-shadow(0 0 5px rgba(245,197,24,.8)); transform:translateY(-2px);}
+.bar{flex:1; min-width:140px; height:12px; background:#d6caa4; border:1.5px solid #6b5f45; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:repeating-linear-gradient(45deg,var(--tape) 0 10px,var(--tape-ink) 10px 20px); transition:width .5s cubic-bezier(.3,1.4,.5,1);}
+.bericht{list-style:none; margin-top:8px;}
+.satz{display:flex; gap:16px; padding:16px 8px 14px; border-bottom:1px dashed rgba(70,58,32,.4); position:relative; transition:background .3s;}
+.satz:hover{background:rgba(255,255,255,.28)}
+.satz.solved{background:linear-gradient(90deg, rgba(30,125,67,.08), transparent 70%);}
+.satz.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.tent{flex:0 0 auto; width:46px; height:54px; clip-path:polygon(0 100%,15% 0,85% 0,100% 100%);
+  background:linear-gradient(#ffd83d,#e6b10e); display:grid; place-items:center; padding-top:9px;
+  font-family:'Staatliches'; font-size:1.35rem; color:#111; filter:drop-shadow(2px 3px 2px rgba(0,0,0,.35));
+  transition:transform .25s; position:relative;}
+.satz:hover .tent{transform:translateY(-3px) rotate(-2deg)}
+.tent::after{content:""; position:absolute; bottom:12px; left:20%; right:20%; height:2px; background:rgba(0,0,0,.28);}
+.satz.solved .tent{background:linear-gradient(#bfe9c6,#79c78c);}
+.satz-body{flex:1; min-width:0;}
+.text{font-family:'Courier Prime'; font-size:1.14rem; line-height:2.05;}
+.luecke{display:inline-block; min-width:8ch; text-align:center; border-bottom:3px solid var(--ink);
+  font-weight:700; padding:0 .4ch; color:transparent; transition:.2s;}
+.luecke::before{content:"?"; color:#9a8c66; font-weight:400;}
+.luecke.full{color:#12492a; border-color:var(--green); background:linear-gradient(transparent 52%, #cdeccd 52%); animation:pop .35s cubic-bezier(.2,2.2,.4,1);}
+.luecke.full::before{content:none}
+.luecke.flash{background:#f6cfca; border-color:var(--red); animation:shake .35s;}
+@keyframes pop{from{transform:scale(.5); opacity:0}}
+.inf{display:none; font-size:.83rem; color:#7a7057; font-style:italic; margin-top:2px;}
+body.show-inf .inf{display:block}
+.opts{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+.opt{font-family:'Courier Prime'; font-weight:700; font-size:1.02rem; cursor:pointer;
+  background:#fff8e3; border:2px solid var(--ink); padding:7px 16px; box-shadow:2px 3px 0 rgba(20,22,26,.75);
+  transition:transform .15s, box-shadow .15s, background .2s;}
+.opt:hover:not(:disabled){transform:translateY(-3px) rotate(-.7deg); box-shadow:3px 6px 0 rgba(20,22,26,.75); background:#fffdf4;}
+.opt:disabled{cursor:not-allowed}
+.opt.used-wrong{opacity:.45; text-decoration:line-through; border-style:dashed; background:#f2d9d4;}
+.opt.right{background:#cdeccd; border-color:var(--green); color:#12492a; box-shadow:2px 3px 0 rgba(30,125,67,.6);}
+.ok-stamp{position:absolute; right:10px; top:10px; font-family:'Staatliches'; font-size:1.15rem; letter-spacing:.14em;
+  color:var(--green); border:3px solid var(--green); padding:1px 10px; transform:rotate(-7deg) scale(0); opacity:0; pointer-events:none;}
+.satz.solved .ok-stamp{animation:stampIn .45s cubic-bezier(.2,2.4,.4,1) .1s both;}
+@keyframes stampIn{from{transform:rotate(-20deg) scale(2.6); opacity:0} 70%{transform:rotate(-6deg) scale(.94); opacity:1} to{transform:rotate(-7deg) scale(1); opacity:1}}
+.unterschrift{margin-top:26px; border-top:4px double var(--ink); padding-top:16px; display:flex; flex-wrap:wrap; gap:20px;
+  font-family:'Courier Prime'; font-size:.95rem; color:var(--ink-soft);}
+.unterschrift .linie{display:inline-block; border-bottom:1.5px dotted var(--ink); min-width:170px;}
+.polaroid{position:absolute; right:-30px; bottom:60px; width:158px; background:#fff; padding:9px 9px 30px;
+  transform:rotate(6deg); box-shadow:0 14px 26px rgba(0,0,0,.45); z-index:8; transition:transform .3s;}
+.polaroid:hover{transform:rotate(2deg) scale(1.04)}
+.polaroid svg{width:100%; height:110px; color:#26324a;}
+.polaroid figcaption{font-family:'Courier Prime'; font-size:.72rem; text-align:center; margin-top:6px; color:#333;}
+.overlay{position:fixed; inset:0; z-index:100; background:rgba(8,11,16,.82); display:grid; place-items:center;
+  opacity:0; visibility:hidden; pointer-events:none; transition:opacity .35s, visibility .35s;}
+.overlay.show{opacity:1; visibility:visible; pointer-events:auto}
+.overlay .cf-layer{position:absolute; inset:0; overflow:hidden; pointer-events:none;}
+.cf{position:absolute; top:-6vh; animation:fall linear both;}
+@keyframes fall{to{transform:translateY(115vh) rotate(680deg)}}
+.urkunde{position:relative; background:linear-gradient(180deg,#f5ecd7,#e8d9b8); max-width:540px; width:92%;
+  padding:44px 40px 34px; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,.7); transform:translateY(20px); transition:transform .35s;}
+.overlay.show .urkunde{transform:translateY(0)}
+.big-stamp{font-family:'Staatliches'; font-size:clamp(1.9rem,5vw,2.8rem); color:var(--green); border:5px double var(--green);
+  display:inline-block; padding:.1em .5em; transform:rotate(-6deg); letter-spacing:.1em; mix-blend-mode:multiply;
+  animation:stampIn .5s cubic-bezier(.2,2.4,.4,1) .15s both;}
+.urkunde p{margin:18px 0 6px; font-size:1.05rem;}
+.urkunde .bewertung{font-family:'Courier Prime'; font-weight:700; font-size:1.15rem; color:var(--blue);}
+.urkunde .statistik{font-family:'Courier Prime'; margin:14px auto; display:inline-block; text-align:left; font-size:.98rem;}
+.urkunde .knopf-big{font-size:1.15rem; margin:8px 6px 0;}
+.mute{position:fixed; left:16px; bottom:56px; z-index:70; background:var(--tape); border:2px solid var(--tape-ink);
+  font-size:1.15rem; padding:6px 10px; cursor:pointer; box-shadow:2px 3px 0 rgba(0,0,0,.5); transform:rotate(-3deg); transition:transform .15s;}
+.mute:hover{transform:rotate(3deg) scale(1.08)}
+@media (max-width:760px){
+  body{padding:64px 8px 80px}
+  .akte{padding:36px 20px 30px}
+  .kopf{flex-direction:column}
+  .stamp-eilt,.polaroid{display:none}
+  .m-label{flex-basis:110px}
+  .text{font-size:1.02rem}
+  .satz{gap:10px}
+  .tent{width:38px; height:46px; font-size:1.1rem}
+}
+@media print{
+  body{background:#fff; padding:0}
+  .tape,.dust,.fp-bg,#glow,.opts,.controls,.spicker,.mute,.polaroid,.ok-stamp,.anleitung,.wiederholen{display:none!important}
+  .akte{box-shadow:none; border:1px solid #999}
+  .luecke{color:#000}
+  .luecke::before{content:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important; animation-iteration-count:1!important; transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="fp" viewBox="0 0 200 220">
+    <g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" transform="rotate(-8 100 110)">
+      <ellipse cx="100" cy="112" rx="11" ry="15" stroke-dasharray="26 7"/>
+      <ellipse cx="100" cy="112" rx="23" ry="31" stroke-dasharray="34 9 12 8"/>
+      <ellipse cx="100" cy="112" rx="35" ry="48" stroke-dasharray="40 10 18 9"/>
+      <ellipse cx="100" cy="112" rx="47" ry="64" stroke-dasharray="52 12 20 10"/>
+      <ellipse cx="100" cy="112" rx="59" ry="80" stroke-dasharray="60 14 26 12"/>
+      <ellipse cx="100" cy="112" rx="71" ry="96" stroke-dasharray="70 16 30 14"/>
+      <path d="M40 190 Q100 158 160 190" stroke-dasharray="30 10"/>
+      <path d="M52 205 Q100 178 148 205" stroke-dasharray="22 9"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="tape tape-top" aria-hidden="true"><div class="tape-inner">
+  <span>⛔ POLIZEI · TATORT · BITTE NICHT BETRETEN · CRIME SCENE · POLIZEI · TATORT · BITTE NICHT BETRETEN · CRIME SCENE ·&nbsp;</span>
+  <span>⛔ POLIZEI · TATORT · BITTE NICHT BETRETEN · CRIME SCENE · POLIZEI · TATORT · BITTE NICHT BETRETEN · CRIME SCENE ·&nbsp;</span>
+</div></div>
+<div class="tape tape-bottom" aria-hidden="true"><div class="tape-inner">
+  <span>SPURENSICHERUNG · INTERPOL · TATORT NICHT VERÄNDERN · SPURENSICHERUNG · INTERPOL · TATORT NICHT VERÄNDERN ·&nbsp;</span>
+  <span>SPURENSICHERUNG · INTERPOL · TATORT NICHT VERÄNDERN · SPURENSICHERUNG · INTERPOL · TATORT NICHT VERÄNDERN ·&nbsp;</span>
+</div></div>
+
+<svg class="fp-bg" aria-hidden="true"><use href="#fp"/></svg>
+<div class="dust" id="dust" aria-hidden="true"></div>
+<div id="glow" aria-hidden="true"></div>
+
+<button class="mute" id="muteBtn" title="Ton an/aus" aria-label="Ton an oder aus">🔊</button>
+
+<main class="desk">
+  <section class="akte" aria-label="Polizeibericht">
+    <div class="ecke tl"></div><div class="ecke tr"></div><div class="ecke bl"></div><div class="ecke br"></div>
+    <div class="stamp stamp-geheim">STRENG GEHEIM</div>
+    <div class="stamp stamp-eilt">EILT SEHR!</div>
+
+    <header class="kopf">
+      <div class="badge"><b>★ INTERPOL ★</b><small>Internationale Kriminalpolizei<br>Abteilung Berlin</small></div>
+      <div>
+        <span class="tag-aufgabe">AUFGABE 8</span>
+        <h1>POLIZEIBERICHT</h1>
+        <p class="untertitel">Fall Nr. INT-B-2026-0519 · „Der Diebstahl im Grandhotel Adlon“ · Amtliches Protokoll im Präteritum</p>
+      </div>
+    </header>
+
+    <div class="meta" id="meta" aria-live="polite"></div>
+
+    <p class="anleitung">▶ Lesen Sie den Bericht und wählen Sie für jede Lücke die richtige Form im <b>Präteritum</b>.
+      <small>Прочитайте протокол и выберите для каждого пропуска правильную форму глагола в Präteritum.</small>
+    </p>
+
+    <div class="controls">
+      <label class="switch"><input type="checkbox" id="infToggle"> 💡 Infinitive anzeigen</label>
+      <details class="spicker">
+        <summary>Spickzettel: unregelmäßige Verben</summary>
+        <div class="zettel">
+          <span>geschehen → <b>geschah</b></span><span>einbrechen → <b>brach … ein</b></span>
+          <span>aufbrechen → <b>brach … auf</b></span><span>stehlen → <b>stahl</b></span>
+          <span>sein → <b>war</b></span><span>finden → <b>fand</b></span>
+          <span>sehen → <b>sah</b></span><span>bleiben → <b>blieb</b></span>
+        </div>
+      </details>
+      <span class="chip">✔ Lücken: <b id="cntSolved">0</b>/<b id="cntTotal">8</b></span>
+      <span class="chip">✘ Fehler: <b id="cntFails">0</b></span>
+      <button class="knopf-big" id="resetBtn" type="button" style="font-size:1.05rem; padding:8px 18px;">🔄 Noch einmal üben</button>
+      <button class="knopf" id="printBtn" type="button">🖨 Drucken</button>
+    </div>
+
+    <div class="fortschritt" aria-hidden="true">
+      <div class="minis" id="minis"></div>
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+
+    <ol class="bericht" id="bericht"></ol>
+
+    <div class="wiederholen">
+      <button class="knopf-big" id="repeatBtn" type="button">🔄 Übung noch einmal machen</button>
+    </div>
+
+    <footer class="unterschrift">
+      <span>Unterschrift: <span class="linie"></span></span>
+      <span>Dienstnummer: <span class="linie" style="min-width:90px"></span></span>
+      <span>Berlin, den 20. Mai 2026</span>
+    </footer>
+
+    <figure class="polaroid" aria-hidden="true">
+      <svg><use href="#fp"/></svg>
+      <figcaption>Beweisstück A<br>Fingerabdruck am Safe</figcaption>
+    </figure>
+  </section>
+</main>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="cf-layer" id="cfLayer"></div>
+  <div class="urkunde" role="dialog" aria-modal="true" aria-label="Ergebnis">
+    <div class="big-stamp">FALL DOKUMENTIERT</div>
+    <p id="fertigText"></p>
+    <p class="bewertung" id="bewertung"></p>
+    <div class="statistik" id="statistik"></div><br>
+    <button class="knopf-big" id="againBtn" type="button">🔄 Noch einmal üben</button>
+    <button class="knopf" id="closeBtn" type="button">📄 Bericht ansehen</button>
+  </div>
+</div>
+
+<script>
+/* ================== ДАННЫЕ ==================
+   Порядок вариантов НЕ фиксирован: при каждой отрисовке (загрузка страницы,
+   «Noch einmal üben») варианты перемешиваются случайно (Fisher–Yates). */
+const SAETZE = [
+ {inf:"geschehen",
+  parts:["In der Nacht vom 19. auf den 20. Mai 2026 ","A"," im Grandhotel „Adlon“ in Berlin ein schweres Verbrechen."],
+  wa:"10ch",
+  opts:[{t:"geschah",a:"geschah",ok:1},{t:"geschahen",a:"geschahen"},{t:"geschiehte",a:"geschiehte"}]},
+ {inf:"einbrechen",
+  parts:["Um 23:50 Uhr ","A"," ein Einbrecher in das Büro des Direktors ","B","."],
+  wa:"9ch", wb:"6ch",
+  opts:[{t:"brechte … ein",a:"brechte",b:"ein"},{t:"bruch … ein",a:"bruch",b:"ein"},{t:"brach … ein",a:"brach",b:"ein",ok:1}]},
+ {inf:"aufbrechen",
+  parts:["Der Täter ","A"," den Safe des Direktors ","B","."],
+  wa:"8ch", wb:"6ch",
+  opts:[{t:"brach … auf",a:"brach",b:"auf",ok:1},{t:"brechte … auf",a:"brechte",b:"auf"},{t:"bruch … auf",a:"bruch",b:"auf"}]},
+ {inf:"stehlen",
+  parts:["Aus dem Safe ","A"," er den berühmten „Blauen Diamanten“."],
+  wa:"8ch",
+  opts:[{t:"stehlte",a:"stehlte"},{t:"stahlte",a:"stahlte"},{t:"stahl",a:"stahl",ok:1}]},
+ {inf:"wert sein",
+  parts:["Der Diamant ","A"," fünf Millionen Euro ","B","."],
+  wa:"6ch", wb:"6ch",
+  opts:[{t:"war … wert",a:"war",b:"wert",ok:1},{t:"hatte … wert",a:"hatte",b:"wert"},{t:"wurde … wert",a:"wurde",b:"wert"}]},
+ {inf:"finden",
+  parts:["Die Polizei ","A"," am Safe eine wichtige Spur: einen Fingerabdruck."],
+  wa:"7ch",
+  opts:[{t:"fand",a:"fand",ok:1},{t:"fanden",a:"fanden"},{t:"findete",a:"findete"}]},
+ {inf:"sehen",
+  parts:["Ein Zeuge, Herr Friedrich, ","A"," vier verdächtige Personen."],
+  wa:"6ch",
+  opts:[{t:"sah",a:"sah",ok:1},{t:"sehte",a:"sehte"},{t:"sahte",a:"sahte"}]},
+ {inf:"bleiben",
+  parts:["Der Fall ","A"," zunächst ungelöst — jetzt übernimmt Interpol!"],
+  wa:"8ch",
+  opts:[{t:"bliebte",a:"bliebte"},{t:"bleibt",a:"bleibt"},{t:"blieb",a:"blieb",ok:1}]}
+];
+
+const META = [
+ ["Aktenzeichen","INT-B-2026-0519"],
+ ["Tatort","Grandhotel „Adlon“, Berlin — Büro des Direktors"],
+ ["Tatzeit","Nacht vom 19. auf den 20. Mai 2026, 23:50 Uhr"],
+ ["Vorfall","Einbruch in den Safe · Diebstahl des „Blauen Diamanten“ (5 000 000 €)"],
+ ["Spur","ein Fingerabdruck am Safe"],
+ ["Status","__STATUS__"]
+];
+
+let solved = 0, fails = 0, finished = false;
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id => document.getElementById(id);
+
+/* ================== ПЕРЕМЕШИВАНИЕ (Fisher–Yates) ================== */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ================== ЗВУК ================== */
+let ctx = null, muted = false;
+function ac(){ if(!ctx){ try{ ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return ctx; }
+function beep(f,d,type,vol,delay){
+  if(muted) return; const c = ac(); if(!c) return;
+  try{
+    const o=c.createOscillator(), g=c.createGain(), t=c.currentTime+(delay||0);
+    o.type=type||"sine"; o.frequency.value=f;
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol||.12,t+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t+d+.05);
+  }catch(e){}
+}
+const sndCorrect = ()=>{ beep(620,.12,"triangle",.14); beep(930,.16,"triangle",.12,.1); };
+const sndWrong   = ()=>{ beep(150,.2,"sawtooth",.1); beep(105,.22,"sawtooth",.09,.06); };
+const sndStamp   = ()=>{ beep(85,.16,"sine",.3); beep(55,.2,"sine",.2,.02); };
+$("muteBtn").addEventListener("click",()=>{ muted=!muted; $("muteBtn").textContent = muted?"🔇":"🔊"; });
+
+/* ================== ШАПКА ДЕЛА (печатающая машинка) ================== */
+(function buildMeta(){
+  const box = $("meta");
+  META.forEach(([label,val])=>{
+    const row=document.createElement("div"); row.className="meta-row";
+    const l=document.createElement("span"); l.className="m-label"; l.textContent=label.toUpperCase();
+    const v=document.createElement("span"); v.className="m-val";
+    if(val==="__STATUS__"){
+      v.innerHTML='<span class="status offen" id="statusChip">UNGELÖST</span>';
+    }
+    row.append(l,v); box.appendChild(row);
+    if(val!=="__STATUS__") v.dataset.full=val;
+  });
+  const vals=[...box.querySelectorAll(".m-val[data-full]")];
+  if(RM){ vals.forEach(v=>v.textContent=v.dataset.full); return; }
+  let i=0;
+  (function typeNext(){
+    if(i>=vals.length) return;
+    const el=vals[i++], text=el.dataset.full; el.classList.add("typing");
+    let k=0;
+    const iv=setInterval(()=>{
+      el.textContent=text.slice(0,++k);
+      if(k>=text.length){ clearInterval(iv); el.classList.remove("typing"); setTimeout(typeNext,120); }
+    },14);
+  })();
+})();
+
+/* ================== ОТРИСОВКА (варианты каждый раз в новом порядке) ================== */
+function render(){
+  const ol=$("bericht"); ol.innerHTML="";
+  const minis=$("minis"); minis.innerHTML="";
+  SAETZE.forEach((s,i)=>{
+    const li=document.createElement("li"); li.className="satz"; li.dataset.i=i;
+    const tent=document.createElement("div"); tent.className="tent"; tent.textContent=i+1;
+    const body=document.createElement("div"); body.className="satz-body";
+    const p=document.createElement("p"); p.className="text";
+    s.parts.forEach(part=>{
+      if(part==="A"||part==="B"){
+        const sp=document.createElement("span"); sp.className="luecke"; sp.dataset.slot=part.toLowerCase();
+        if(part==="A") sp.style.minWidth=s.wa||"8ch"; else sp.style.minWidth=s.wb||"6ch";
+        p.appendChild(sp);
+      } else p.appendChild(document.createTextNode(part));
+    });
+    const inf=document.createElement("p"); inf.className="inf"; inf.textContent="Infinitiv: "+s.inf;
+    const opts=document.createElement("div"); opts.className="opts";
+    const reihenfolge = shuffle(s.opts.slice());   // случайный порядок вариантов
+    reihenfolge.forEach((o,j)=>{
+      const b=document.createElement("button"); b.type="button"; b.className="opt"; b.textContent=o.t;
+      b.setAttribute("aria-label","Satz "+(i+1)+", Antwort "+(j+1)+": "+o.t);
+      b.addEventListener("click",()=>answer(i,o,b));
+      opts.appendChild(b);
+    });
+    body.append(p,inf,opts);
+    const stamp=document.createElement("div"); stamp.className="ok-stamp"; stamp.textContent="KORREKT";
+    li.append(tent,body,stamp); ol.appendChild(li);
+    const m=document.createElement("span"); m.className="mini"; m.textContent=i+1; minis.appendChild(m);
+  });
+}
+
+/* ================== ЛОГИКА ================== */
+function answer(i,opt,btn){
+  if(finished) return;
+  const li=document.querySelector('.satz[data-i="'+i+'"]');
+  if(!li || li.classList.contains("solved") || btn.disabled) return;
+  if(opt.ok){
+    li.classList.add("solved");
+    const a=li.querySelector('[data-slot="a"]');
+    if(a){ a.textContent=opt.a; a.classList.add("full"); }
+    const bb=li.querySelector('[data-slot="b"]');
+    if(bb && opt.b){ bb.textContent=opt.b; bb.classList.add("full"); }
+    li.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+    btn.classList.add("right");
+    document.querySelectorAll(".mini")[i].classList.add("on");
+    solved++; sndCorrect(); updateCounters();
+    if(solved===SAETZE.length) finish();
+  } else {
+    fails++;
+    btn.classList.add("used-wrong"); btn.disabled=true;
+    li.classList.remove("shake"); void li.offsetWidth; li.classList.add("shake");
+    li.querySelectorAll(".luecke").forEach(l=>{ l.classList.remove("flash"); void l.offsetWidth; l.classList.add("flash");
+      setTimeout(()=>l.classList.remove("flash"),500); });
+    sndWrong(); updateCounters();
+  }
+}
+function updateCounters(){
+  $("cntSolved").textContent=solved; $("cntFails").textContent=fails;
+  $("barFill").style.width=(solved/SAETZE.length*100)+"%";
+}
+function finish(){
+  finished=true;
+  const chip=$("statusChip"); chip.textContent="ABGESCHLOSSEN ✓"; chip.className="status fertig";
+  sndStamp();
+  setTimeout(()=>{
+    let msg;
+    if(fails===0) msg="Perfekte Ermittlung — null Fehler! ★★★";
+    else if(fails<=2) msg="Sehr gute Arbeit, Detektiv*in! ★★";
+    else if(fails<=5) msg="Gut gelöst — ein bisschen mehr Übung! ★";
+    else msg="Fall dokumentiert! Üben Sie das Präteritum noch einmal.";
+    $("fertigText").innerHTML="Alle "+SAETZE.length+" Lücken sind korrekt — der Polizeibericht ist fertig!<br>Lesen Sie den Bericht jetzt laut vor. 🎤";
+    $("bewertung").textContent=msg;
+    $("statistik").innerHTML="Lücken: "+SAETZE.length+"/"+SAETZE.length+" &nbsp;·&nbsp; Fehler: "+fails+" &nbsp;·&nbsp; Datum: 20. Mai 2026";
+    $("overlay").classList.add("show"); $("overlay").setAttribute("aria-hidden","false");
+    confetti();
+  },650);
+}
+function confetti(){
+  const layer=$("cfLayer"); layer.innerHTML="";
+  const colors=["#f5c518","#14161a","#c1272d","#f1e7cf","#1e7d43"];
+  for(let k=0;k<30;k++){
+    const c=document.createElement("span"); c.className="cf";
+    c.style.left=Math.random()*100+"vw";
+    c.style.width=(7+Math.random()*8)+"px"; c.style.height=(5+Math.random()*7)+"px";
+    c.style.background=colors[k%colors.length];
+    c.style.animationDuration=(2.4+Math.random()*2)+"s";
+    c.style.animationDelay=(Math.random()*.9)+"s";
+    c.style.transform="rotate("+Math.random()*360+"deg)";
+    layer.appendChild(c);
+  }
+}
+function closeOverlay(){ $("overlay").classList.remove("show"); $("overlay").setAttribute("aria-hidden","true"); }
+function reset(){
+  solved=0; fails=0; finished=false; updateCounters();
+  const chip=$("statusChip"); chip.textContent="UNGELÖST"; chip.className="status offen";
+  render(); closeOverlay();
+  window.scrollTo({top:0, behavior: RM ? "auto" : "smooth"});
+}
+$("resetBtn").addEventListener("click",reset);
+$("repeatBtn").addEventListener("click",reset);
+$("againBtn").addEventListener("click",reset);
+$("closeBtn").addEventListener("click",closeOverlay);
+$("printBtn").addEventListener("click",()=>window.print());
+$("infToggle").addEventListener("change",e=>document.body.classList.toggle("show-inf",e.target.checked));
+$("cntTotal").textContent=SAETZE.length;
+
+/* ================== АТМОСФЕРА ================== */
+(function dust(){
+  const d=$("dust");
+  for(let i=0;i<16;i++){
+    const s=document.createElement("span");
+    s.style.left=Math.random()*100+"vw";
+    s.style.width=s.style.height=(2+Math.random()*2.5)+"px";
+    s.style.opacity=(.12+Math.random()*.3).toFixed(2);
+    s.style.animationDuration=(9+Math.random()*14)+"s";
+    s.style.animationDelay=(-Math.random()*20)+"s";
+    d.appendChild(s);
+  }
+})();
+if(matchMedia("(pointer:fine)").matches && !RM){
+  let raf=null;
+  document.addEventListener("mousemove",e=>{
+    if(raf) return;
+    raf=requestAnimationFrame(()=>{
+      document.getElementById("glow").style.setProperty("--x",e.clientX+"px");
+      document.getElementById("glow").style.setProperty("--y",e.clientY+"px");
+      raf=null;
+    });
+  });
+}
+render(); updateCounters();
+</script>
+</body>
+</html>
