@@ -1,0 +1,2598 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kälteanlagen-Quest • Final V5</title>
+    <style>
+        /* ---------- GLOBAL ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #dce8f2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .slide-wrapper {
+            max-width: 1100px;
+            width: 100%;
+            min-height: 90vh;
+            position: relative;
+            background: #f0f6fc;
+            border-radius: 56px;
+            border: 1px solid #b8cfe0;
+            box-shadow: 0 30px 60px -12px #8aaec8, inset 0 1px 0 #e8f2fa;
+            padding: 28px 24px;
+            transition: border-color 0.5s, box-shadow 0.5s;
+            overflow: hidden;
+        }
+        .slide-wrapper.success {
+            border-color: #4CAF50;
+            box-shadow: 0 30px 60px -12px #81C784;
+        }
+        .slide-wrapper.final {
+            border-color: #4a8ab8;
+            box-shadow: 0 30px 60px -12px #4a8ab866;
+        }
+
+        /* ---------- HINTERGRUND ---------- */
+        .bg-scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 56px;
+            background: linear-gradient(180deg, #dce8f2 0%, #c5d8e8 100%);
+        }
+        .bg-scene .wall {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55%;
+            background: linear-gradient(180deg, #dce8f2 0%, #c8dae8 100%);
+        }
+        .bg-scene .wall .tiles {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: repeating-linear-gradient(90deg,
+                    rgba(180, 200, 215, 0.3) 0px,
+                    rgba(180, 200, 215, 0.3) 60px,
+                    rgba(160, 185, 205, 0.2) 60px,
+                    rgba(160, 185, 205, 0.2) 62px);
+        }
+        .bg-scene .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            background: linear-gradient(180deg, #c8d8e5 0%, #b0c8d8 100%);
+        }
+        .bg-scene .floor .floor-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-conic-gradient(#c8d8e5 0% 25%, #b8c8d8 0% 50%) 0 0 / 80px 80px;
+            opacity: 0.15;
+        }
+        .bg-scene .table {
+            position: absolute;
+            bottom: 25%;
+            left: 12%;
+            width: 160px;
+            height: 12px;
+            background: #8a9aa8;
+            border-radius: 8px;
+            box-shadow: 0 4px 0 #6a7a88;
+        }
+        .bg-scene .table::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 25px;
+            width: 8px;
+            height: 40px;
+            background: #7a8a98;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 100px 0 0 #7a8a98;
+        }
+        .bg-scene .table2 {
+            position: absolute;
+            bottom: 30%;
+            right: 15%;
+            width: 120px;
+            height: 10px;
+            background: #8a9aa8;
+            border-radius: 8px;
+            box-shadow: 0 4px 0 #6a7a88;
+        }
+        .bg-scene .table2::after {
+            content: '';
+            position: absolute;
+            bottom: -35px;
+            left: 20px;
+            width: 6px;
+            height: 35px;
+            background: #7a8a98;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 70px 0 0 #7a8a98;
+        }
+        .bg-scene .broken-fridge {
+            position: absolute;
+            bottom: 30%;
+            right: 38%;
+            width: 90px;
+            height: 130px;
+            background: linear-gradient(180deg, #c8d8e5 0%, #b0c4d4 100%);
+            border-radius: 12px 12px 8px 8px;
+            border: 3px solid #8aa0b0;
+            box-shadow: 0 8px 0 #6a8298, inset 0 0 0 6px #dce8f2;
+            opacity: 0.5;
+            transform: rotate(-3deg);
+        }
+        .bg-scene .broken-fridge::before {
+            content: '⚠️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+        .bg-scene .broken-fridge .door {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background: linear-gradient(180deg, #dce8f2 0%, #c4d4e2 100%);
+            border-radius: 6px;
+            border: 2px solid #a0b8c8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bg-scene .broken-fridge .door::after {
+            content: '❄️ E5';
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e53935;
+            animation: blink 1.2s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+        .technician {
+            position: absolute;
+            bottom: 28%;
+            left: 45%;
+            z-index: 5;
+            font-size: 4.5rem;
+            animation: techWalk 3s ease-in-out infinite alternate;
+            filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.1));
+            pointer-events: none;
+        }
+        @keyframes techWalk {
+            0% {
+                transform: translateX(-8px) rotate(-2deg);
+            }
+            100% {
+                transform: translateX(8px) rotate(2deg);
+            }
+        }
+        .technician .tool {
+            position: absolute;
+            bottom: -8px;
+            right: -18px;
+            font-size: 1.6rem;
+            animation: toolSwing 1.8s ease-in-out infinite;
+        }
+        @keyframes toolSwing {
+            0%,
+            100% {
+                transform: rotate(-15deg);
+            }
+            50% {
+                transform: rotate(15deg);
+            }
+        }
+
+        /* ---------- INHALT ---------- */
+        .slide-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh;
+            justify-content: space-between;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            background: rgba(220, 235, 248, 0.92);
+            backdrop-filter: blur(8px);
+            padding: 10px 20px;
+            border-radius: 60px;
+            border: 1px solid #b0c8da;
+            color: #1a3a4a;
+            font-size: 0.95rem;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+        .code-word-badge {
+            background: #dce8f2;
+            padding: 4px 20px;
+            border-radius: 40px;
+            letter-spacing: 8px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1a3a4a;
+            border: 1px solid #b0c8da;
+        }
+        .sound-toggle-blue {
+            background: #dce8f2;
+            border: 1px solid #b0c8da;
+            color: #0a2a3a;
+            padding: 4px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.15s;
+        }
+        .sound-toggle-blue:hover {
+            background: #c8dae8;
+        }
+
+        .slide-title {
+            font-size: 1.8rem;
+            color: #0a2a3a;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .slide-title .emoji-big {
+            font-size: 2.5rem;
+        }
+
+        /* ====== СЛАЙД 0: ТЕЛЕФОН ====== */
+        .call-container {
+            background: rgba(220, 235, 248, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 24px 20px 28px;
+            border: 2px solid #b0c8da;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .phone-real-call {
+            background: #0a0a1a;
+            border-radius: 50px;
+            padding: 16px 12px 20px;
+            max-width: 340px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 2px #2a2a4a;
+            border: 1px solid #3a3a5a;
+        }
+        .phone-real-call .phone-notch {
+            background: #0a0a1a;
+            border-radius: 20px 20px 0 0;
+            padding: 8px 16px 4px;
+            display: flex;
+            justify-content: space-between;
+            color: #6a6a8a;
+            font-size: 0.65rem;
+        }
+        .phone-real-call .phone-notch .notch-center {
+            width: 60px;
+            height: 18px;
+            background: #0a0a1a;
+            border-radius: 12px;
+            border: 1px solid #2a2a4a;
+            margin-top: -2px;
+        }
+        .phone-real-call .phone-screen-call {
+            background: #0a1a2a;
+            border-radius: 0 0 40px 40px;
+            padding: 20px 16px 24px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+        .phone-real-call .phone-screen-call .caller-avatar {
+            font-size: 4.5rem;
+            animation: ringPhone 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes ringPhone {
+            0% {
+                transform: rotate(-8deg);
+            }
+            100% {
+                transform: rotate(8deg);
+            }
+        }
+        .phone-real-call .phone-screen-call .caller-name {
+            color: #e8e8ff;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .phone-real-call .phone-screen-call .caller-restaurant {
+            color: #6a8aaa;
+            font-size: 0.85rem;
+        }
+        .phone-real-call .phone-screen-call .call-status {
+            color: #4fc3f7;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+        .phone-real-call .phone-screen-call .call-timer {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            color: #4a6a8a;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+        }
+        .phone-real-call .phone-screen-call .wave-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #4fc3f7, #4a8ab8, #4fc3f7);
+            background-size: 200% 100%;
+            animation: waveMove 1.5s ease-in-out infinite;
+        }
+        @keyframes waveMove {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 200% 0%;
+            }
+        }
+        .phone-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+            justify-content: center;
+        }
+        .phone-btn {
+            padding: 12px 28px;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            min-width: 120px;
+        }
+        .phone-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .phone-btn.answer {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 4px 0 #2e7d32;
+        }
+        .phone-btn.answer:hover:not(:disabled) {
+            background: #43a047;
+            transform: scale(1.02);
+        }
+        .phone-btn.answer:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2e7d32;
+        }
+
+        .story-text {
+            background: #e8f2fa;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border-left: 5px solid #4a8ab8;
+            color: #0a2a3a;
+            font-size: 1rem;
+            line-height: 1.6;
+            text-align: left;
+            margin: 14px 0 10px;
+            min-height: 50px;
+        }
+        .story-text .highlight {
+            color: #c0392b;
+            font-weight: 700;
+        }
+        .story-text .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: #0a2a3a;
+            animation: cursorBlink 0.8s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+        @keyframes cursorBlink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .start-btn-blue {
+            background: #4a8ab8;
+            border: none;
+            padding: 14px 44px;
+            border-radius: 60px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #2a6a8a, 0 0 30px #4a8ab866;
+            transition: 0.12s;
+            margin: 6px auto 0;
+            border: 1px solid #5a9ac8;
+            display: inline-block;
+        }
+        .start-btn-blue:hover:not(:disabled) {
+            transform: scale(1.03);
+            background: #3a7aa8;
+        }
+        .start-btn-blue:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2a6a8a;
+        }
+        .start-btn-blue:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 0 #2a6a8a;
+        }
+
+        /* ---------- STATION 1: DRAG & DROP с реальными картинками ---------- */
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 12px 0;
+        }
+        .equipment-item {
+            background: #e8f2fa;
+            border-radius: 20px;
+            padding: 16px;
+            border: 2px solid #b0c8da;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .equipment-item .eq-image {
+            width: 100%;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #f5f9fc;
+            padding: 6px;
+        }
+        .equipment-item .eq-image svg {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
+        }
+        .equipment-item .eq-drop-zone {
+            background: #dce8f2;
+            border: 2px dashed #6a9ab8;
+            border-radius: 12px;
+            padding: 10px 12px;
+            min-height: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #4a7a8a;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .equipment-item .eq-drop-zone.filled {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            color: #1a4a2a;
+        }
+        .equipment-item .eq-drop-zone.drag-over {
+            border-color: #ffb300;
+            background: #fff8e1;
+        }
+
+        .drag-words-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 14px 0;
+        }
+        .drag-word {
+            background: #d0e0ec;
+            padding: 12px 24px;
+            border-radius: 40px;
+            border: 2px solid #6a9ab8;
+            color: #0a2a3a;
+            font-weight: 600;
+            cursor: grab;
+            user-select: none;
+            transition: 0.15s;
+            font-size: 1rem;
+        }
+        .drag-word:hover {
+            background: #b8cfe0;
+            transform: scale(1.03);
+        }
+        .drag-word.dragging {
+            opacity: 0.4;
+        }
+        .drag-word.placed {
+            opacity: 0.3;
+            pointer-events: none;
+            border-color: #8aacbf;
+            background: #d0e0ec;
+        }
+
+        /* ---------- STATION 2: ДИСПЛЕЙ ---------- */
+        .display-container {
+            background: #0a1a2a;
+            border-radius: 28px;
+            padding: 20px 16px;
+            border: 4px solid #4a8ab8;
+            box-shadow: inset 0 0 40px #00224455, 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .display-container .display-text {
+            font-family: 'Courier New', monospace;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            letter-spacing: 4px;
+            animation: blink 1s step-end infinite;
+        }
+        .display-container .display-text.success {
+            color: #4fc3f7;
+            animation: none;
+        }
+
+        .error-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 12px 0;
+        }
+        .error-panel .col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .error-panel .col-title {
+            font-weight: 600;
+            color: #0a2a3a;
+            font-size: 0.8rem;
+            padding-bottom: 3px;
+            border-bottom: 2px solid #b0c8da;
+        }
+        .error-item {
+            background: #dce8f2;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 2px solid #b0c8da;
+            color: #0a2a3a;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.85rem;
+        }
+        .error-item:hover {
+            background: #c8dae8;
+        }
+        .error-item.selected {
+            border-color: #ffb300;
+            background: #fff8e1;
+        }
+        .error-item.matched {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            cursor: default;
+            opacity: 0.6;
+        }
+        .error-item.wrong {
+            border-color: #e53935;
+            background: #ffebee;
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-8px);
+            }
+            75% {
+                transform: translateX(8px);
+            }
+        }
+
+        .action-item {
+            background: #dce8f2;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 2px solid #b0c8da;
+            color: #0a2a3a;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.85rem;
+        }
+        .action-item:hover {
+            background: #c8dae8;
+        }
+        .action-item.selected-action {
+            border-color: #ffb300;
+            background: #fff8e1;
+        }
+        .action-item.matched-action {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            cursor: default;
+            opacity: 0.6;
+        }
+        .action-item.wrong-action {
+            border-color: #e53935;
+            background: #ffebee;
+            animation: shake 0.4s ease;
+        }
+
+        /* ---------- STATION 3 & 4: МЕССЕНДЖЕР ---------- */
+        .phone-real {
+            background: #1a1a2e;
+            border-radius: 40px;
+            padding: 14px 10px 18px;
+            max-width: 380px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 0 2px #2a2a4a;
+            border: 1px solid #3a3a5a;
+        }
+        .phone-real .phone-notch {
+            background: #0a0a1a;
+            border-radius: 20px 20px 0 0;
+            padding: 8px 14px 4px;
+            display: flex;
+            justify-content: space-between;
+            color: #6a6a8a;
+            font-size: 0.6rem;
+        }
+        .phone-real .phone-notch .notch-center {
+            width: 60px;
+            height: 18px;
+            background: #0a0a1a;
+            border-radius: 12px;
+            border: 1px solid #2a2a4a;
+            margin-top: -2px;
+        }
+        .phone-real .phone-screen {
+            background: #0a0a1a;
+            border-radius: 0 0 32px 32px;
+            padding: 10px 8px 14px;
+            min-height: 320px;
+        }
+        .phone-real .phone-screen .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #1a1a3a;
+            color: #d0d0e8;
+            font-size: 0.85rem;
+        }
+        .phone-real .phone-screen .chat-header .avatar {
+            font-size: 1.6rem;
+        }
+        .phone-real .phone-screen .chat-header .name {
+            font-weight: 600;
+            color: #e8e8ff;
+        }
+        .phone-real .phone-screen .chat-header .status {
+            font-size: 0.65rem;
+            color: #4fc3f7;
+            margin-left: auto;
+        }
+        .phone-real .phone-screen .chat-messages {
+            padding: 8px 0;
+            min-height: 180px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .phone-real .phone-screen .chat-messages .msg {
+            margin: 3px 0;
+            padding: 6px 12px;
+            border-radius: 14px;
+            max-width: 85%;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .phone-real .phone-screen .chat-messages .msg.boss {
+            background: #1a2a4a;
+            color: #c8d0ea;
+            align-self: flex-start;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .phone-real .phone-screen .chat-messages .msg.me {
+            background: #2a6a8a;
+            color: #e8f4fc;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .phone-real .phone-screen .chat-messages .msg.system {
+            background: transparent;
+            color: #4a8a6a;
+            text-align: center;
+            font-size: 0.75rem;
+            max-width: 100%;
+        }
+        .phone-real .phone-screen .chat-input {
+            display: flex;
+            gap: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #1a1a3a;
+        }
+        .phone-real .phone-screen .chat-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 30px;
+            border: 1px solid #2a2a5a;
+            background: #12122a;
+            color: #d0d8ec;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .phone-real .phone-screen .chat-input input:focus {
+            border-color: #4a8ab8;
+        }
+        .phone-real .phone-screen .chat-input input:disabled {
+            opacity: 0.5;
+        }
+        .phone-real .phone-screen .chat-input button {
+            background: #2a6a8a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 0.85rem;
+        }
+        .phone-real .phone-screen .chat-input button:hover {
+            background: #3a7aa8;
+        }
+        .phone-real .phone-screen .chat-input button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .chat-hint {
+            background: #1a2a3a;
+            color: #8ab4d4;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            text-align: center;
+            border: 1px solid #2a4a5a;
+        }
+        .chat-hint strong {
+            color: #ffd966;
+        }
+
+        /* ---------- STATION 5: КОМПЬЮТЕР С ОТЧЁТОМ ---------- */
+        .computer {
+            background: #2a2a3a;
+            border-radius: 16px 16px 8px 8px;
+            padding: 12px 12px 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            margin: 0 auto;
+            border: 2px solid #4a4a5a;
+        }
+        .computer .monitor {
+            background: #0a0a1a;
+            border-radius: 8px 8px 4px 4px;
+            padding: 16px 18px;
+            min-height: 240px;
+            border: 3px solid #4a4a5a;
+            color: #c0d0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+        .computer .monitor .report-header {
+            border-bottom: 2px solid #4a6a7a;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #8ab4d4;
+        }
+        .computer .monitor .report-body {
+            line-height: 1.8;
+        }
+        .computer .monitor .report-body .field {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 2px dashed #4a8ab8;
+            color: #ffd966;
+            font-weight: 700;
+        }
+        .computer .monitor .report-body .field-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed #4a8ab8;
+            color: #ffd966;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            width: 120px;
+            padding: 0 4px;
+        }
+        .computer .monitor .report-body .field-input:focus {
+            border-bottom-color: #4fc3f7;
+        }
+        .computer .monitor .report-body .hint {
+            color: #6a8a9a;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+        .computer .stand {
+            width: 60px;
+            height: 12px;
+            background: #3a3a4a;
+            margin: 4px auto 0;
+            border-radius: 4px;
+        }
+        .computer .base {
+            width: 120px;
+            height: 6px;
+            background: #3a3a4a;
+            margin: 0 auto;
+            border-radius: 4px;
+        }
+
+        .option-btn-blue {
+            background: #dce8f2;
+            border: 2px solid #b0c8da;
+            padding: 10px 18px;
+            border-radius: 60px;
+            color: #0a2a3a;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.15s;
+            flex: 1 0 140px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .option-btn-blue:hover:not(:disabled) {
+            background: #c8dae8;
+            border-color: #6a9ab8;
+            transform: scale(1.02);
+        }
+        .option-btn-blue.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+            box-shadow: 0 0 20px #a5d6a7;
+        }
+        .option-btn-blue.wrong {
+            background: #ffcdd2;
+            border-color: #e53935;
+        }
+        .option-btn-blue:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback-msg-blue {
+            padding: 10px 16px;
+            border-radius: 20px;
+            background: #e8f2fa;
+            border-left: 5px solid #6a9ab8;
+            color: #0a2a3a;
+            min-height: 44px;
+            margin: 8px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+        .feedback-msg-blue.success {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        .feedback-msg-blue.error {
+            border-left-color: #e53935;
+            background: #ffebee;
+        }
+
+        .next-btn-blue {
+            background: #4a8ab8;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            align-self: flex-end;
+            box-shadow: 0 4px 0 #2a6a8a;
+            border: 1px solid #5a9ac8;
+            margin-top: 4px;
+        }
+        .next-btn-blue:hover:not(:disabled) {
+            background: #3a7aa8;
+            transform: scale(1.02);
+        }
+        .next-btn-blue:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: scale(0.97);
+        }
+
+        /* ---------- LETTER OVERLAY ---------- */
+        .letter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(220, 235, 248, 0.96);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+        .letter-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .letter-overlay .big-letter {
+            font-size: 20rem;
+            font-weight: 700;
+            color: #4a8ab8;
+            text-shadow: 0 0 80px #81b4d8, 0 0 160px #a8cce0;
+            animation: popLetter 0.9s cubic-bezier(0.2, 1.3, 0.4, 1) forwards;
+            transform: scale(0.2) rotate(-20deg);
+            opacity: 0;
+        }
+        @keyframes popLetter {
+            0% {
+                transform: scale(0.2) rotate(-20deg);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.4) rotate(6deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        .letter-overlay .sub {
+            color: #0a2a3a;
+            font-size: 1.3rem;
+            background: rgba(220, 235, 248, 0.9);
+            padding: 10px 28px;
+            border-radius: 60px;
+            border: 1px solid #b0c8da;
+            margin-top: 10px;
+        }
+        .letter-overlay .next-station-btn {
+            margin-top: 24px;
+            background: #4a8ab8;
+            border: none;
+            padding: 14px 42px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #5a9ac8;
+            box-shadow: 0 4px 0 #2a6a8a;
+        }
+        .letter-overlay .next-station-btn:hover {
+            background: #3a7aa8;
+            transform: scale(1.03);
+        }
+        .letter-overlay .next-station-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2a6a8a;
+        }
+
+        /* ---------- ФИНАЛЬНЫЙ СЛАЙД ---------- */
+        .final-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px 0;
+            flex: 1;
+        }
+        .final-slide .big-word {
+            font-size: 5rem;
+            font-weight: 700;
+            color: #4a8ab8;
+            letter-spacing: 12px;
+            text-shadow: 0 4px 20px #81b4d8;
+            margin-bottom: 20px;
+        }
+        .final-slide .translate-box {
+            background: #e8f2fa;
+            padding: 20px 30px;
+            border-radius: 24px;
+            border: 2px solid #b0c8da;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .final-slide .translate-box label {
+            font-weight: 600;
+            color: #0a2a3a;
+        }
+        .final-slide .translate-box input {
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 2px solid #b0c8da;
+            font-size: 1.2rem;
+            text-align: center;
+            width: 200px;
+            outline: none;
+        }
+        .final-slide .translate-box input:focus {
+            border-color: #4a8ab8;
+        }
+        .final-slide .translate-box .check-btn {
+            background: #4a8ab8;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 1rem;
+        }
+        .final-slide .translate-box .check-btn:hover {
+            background: #3a7aa8;
+            transform: scale(1.02);
+        }
+        .final-slide .translate-box .result-msg {
+            font-size: 1.1rem;
+            font-weight: 500;
+            min-height: 30px;
+        }
+        .final-slide .translate-box .result-msg.success {
+            color: #4CAF50;
+        }
+        .final-slide .translate-box .result-msg.error {
+            color: #e53935;
+        }
+
+        /* ---------- ФИНАЛЬНЫЙ ТЕЛЕФОН ---------- */
+        .final-call-container {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .final-call-container .phone-real-call {
+            max-width: 340px;
+        }
+
+        /* ---------- УВЕДОМЛЕНИЕ О ДЕНЬГАХ ---------- */
+        .notification {
+            background: #1a2a3a;
+            border-left: 4px solid #4CAF50;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin: 10px auto;
+            max-width: 340px;
+            color: #e0e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+        .notification.show {
+            display: flex;
+        }
+        .notification .icon {
+            font-size: 2rem;
+        }
+        .notification .text {
+            flex: 1;
+        }
+        .notification .text .amount {
+            font-weight: 700;
+            color: #4fc3f7;
+        }
+
+        /* ---------- ЗАТЕМНЕНИЕ И ПОБЕДНАЯ НАДПИСЬ ---------- */
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+            backdrop-filter: blur(8px);
+        }
+        .victory-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .victory-overlay .victory-text {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #ffd966;
+            text-shadow: 0 0 60px #ffb800, 0 0 120px #ff8800;
+            text-align: center;
+            animation: pulseText 2s ease-in-out infinite;
+            margin-bottom: 30px;
+        }
+        .victory-overlay .exit-btn {
+            background: #e53935;
+            border: none;
+            padding: 16px 50px;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 0 #b71c1c;
+            border: 1px solid #ff6b6b;
+        }
+        .victory-overlay .exit-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+        }
+        .victory-overlay .exit-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b71c1c;
+        }
+        @keyframes pulseText {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* ---------- ОБЩЕЕ ---------- */
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .mt-auto {
+            margin-top: auto;
+        }
+        .text-center {
+            text-align: center;
+        }
+
+        @media (max-width: 650px) {
+            .slide-wrapper {
+                padding: 16px 12px;
+                border-radius: 32px;
+            }
+            .slide-title {
+                font-size: 1.3rem;
+            }
+            .equipment-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .equipment-item .eq-image {
+                height: 100px;
+            }
+            .error-panel {
+                grid-template-columns: 1fr;
+            }
+            .letter-overlay .big-letter {
+                font-size: 10rem;
+            }
+            .call-container {
+                padding: 16px 12px;
+            }
+            .phone-real-call {
+                max-width: 100%;
+            }
+            .display-container .display-text {
+                font-size: 2rem;
+            }
+            .phone-real {
+                max-width: 100%;
+            }
+            .top-bar {
+                justify-content: center;
+            }
+            .phone-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .phone-btn {
+                min-width: 160px;
+            }
+            .computer .monitor {
+                font-size: 0.8rem;
+                padding: 12px;
+            }
+            .computer .monitor .report-body .field-input {
+                width: 80px;
+            }
+            .final-slide .big-word {
+                font-size: 3rem;
+                letter-spacing: 6px;
+            }
+            .victory-overlay .victory-text {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ======================== LETTER OVERLAY ======================== -->
+    <div id="letterOverlay" class="letter-overlay">
+        <div class="big-letter" id="bigLetterDisplay">K</div>
+        <div class="sub">⭐ Buchstabe freigeschaltet!</div>
+        <button class="next-station-btn" id="nextStationBtn">➡️ Weiter zur nächsten Station</button>
+    </div>
+
+    <!-- ======================== VICTORY OVERLAY ======================== -->
+    <div id="victoryOverlay" class="victory-overlay">
+        <div class="victory-text">🎉 Sie haben erfolgreich die Quest bestanden! 🎉</div>
+        <button class="exit-btn" id="exitGameBtn">🚪 Spiel beenden</button>
+    </div>
+
+    <!-- ======================== HAUPT-SLIDE ======================== -->
+    <div class="slide-wrapper" id="slideWrapper">
+
+        <!-- ====== HINTERGRUND ====== -->
+        <div class="bg-scene" id="bgScene">
+            <div class="wall"><div class="tiles"></div></div>
+            <div class="floor"><div class="floor-pattern"></div></div>
+            <div class="table"></div>
+            <div class="table2"></div>
+            <div class="broken-fridge"><div class="door"></div></div>
+            <div class="technician" id="techAnim">
+                👨‍🔧
+                <span class="tool">🔧</span>
+            </div>
+        </div>
+
+        <div class="slide-content" id="slideContent">
+            <!-- TOP BAR -->
+            <div class="top-bar">
+                <span class="code-word-badge" id="codeBadge">_ _ _ _ _</span>
+                <span style="display:flex; align-items:center; gap:12px;">
+                    <span>✅ <span id="progressText">0</span>/5</span>
+                    <button class="sound-toggle-blue" id="soundToggle">🔊 Sound an</button>
+                </span>
+            </div>
+
+            <div id="dynamicArea" class="flex-col" style="flex:1;">
+
+                <!-- ====== СЛАЙД 0: ТЕЛЕФОН ====== -->
+                <div id="legendSlide">
+                    <div class="call-container">
+                        <div class="phone-real-call" id="phoneCall">
+                            <div class="phone-notch">
+                                <span>📶</span>
+                                <div class="notch-center"></div>
+                                <span>🔋</span>
+                            </div>
+                            <div class="phone-screen-call">
+                                <span class="call-timer" id="callTimer">00:05</span>
+                                <div class="caller-avatar">👨‍🍳</div>
+                                <div class="caller-name">Chefkoch Müller</div>
+                                <div class="caller-restaurant">🍽️ "Zum goldenen Löwen"</div>
+                                <div class="call-status" id="callStatus">🔴 Anruf ...</div>
+                                <div class="wave-line"></div>
+                            </div>
+                        </div>
+                        <div class="phone-buttons" id="phoneButtons">
+                            <button class="phone-btn answer" id="answerBtn">📞 Antworten</button>
+                        </div>
+                        <div class="story-text" id="storyText" style="display:none;">
+                            <span id="storyContent"></span>
+                            <span class="typing-cursor" id="typingCursor"></span>
+                        </div>
+                        <button class="start-btn-blue" id="startBtn" disabled style="display:none;">🔧 Einsatz annehmen</button>
+                    </div>
+                </div>
+
+                <!-- ====== STATIONEN ====== -->
+                <div id="stationSlides" class="hidden" style="flex:1; display:none; flex-direction:column;"></div>
+
+                <!-- ====== ФИНАЛЬНЫЙ СЛАЙД ====== -->
+                <div id="finalSlide" class="hidden" style="flex:1; display:none; flex-direction:column;">
+                    <div class="final-slide">
+                        <div class="big-word">K Ä L T E</div>
+                        <div class="translate-box">
+                            <label for="translationInput">Übersetzen Sie das Wort ins Russische:</label>
+                            <input type="text" id="translationInput" placeholder="Ihre Übersetzung ..." />
+                            <button class="check-btn" id="checkTranslationBtn">Prüfen</button>
+                            <div class="result-msg" id="translationResult"></div>
+                        </div>
+                        <div id="finalCallContainer" class="final-call-container hidden">
+                            <div class="phone-real-call" id="finalPhone">
+                                <div class="phone-notch">
+                                    <span>📶</span>
+                                    <div class="notch-center"></div>
+                                    <span>🔋</span>
+                                </div>
+                                <div class="phone-screen-call">
+                                    <span class="call-timer" id="finalCallTimer">00:10</span>
+                                    <div class="caller-avatar">👨‍🍳</div>
+                                    <div class="caller-name">Chefkoch Müller</div>
+                                    <div class="caller-restaurant">🍽️ "Zum goldenen Löwen"</div>
+                                    <div class="call-status" id="finalCallStatus">📞 Verbinde ...</div>
+                                    <div class="wave-line"></div>
+                                </div>
+                            </div>
+                            <div class="phone-buttons">
+                                <button class="phone-btn answer" id="finalAnswerBtn">📞 Antworten</button>
+                            </div>
+                            <div class="story-text" id="thanksText" style="display:none; margin-top:10px;">
+                                <span id="thanksContent"></span>
+                                <span class="typing-cursor" id="thanksCursor"></span>
+                            </div>
+                            <div class="notification" id="paymentNotification">
+                                <span class="icon">💰</span>
+                                <span class="text">Rechnung bezahlt: <span class="amount">+ 1.500 €</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  ЗВУКИ
+        // ================================================================
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration, type = 'sine', volume = 0.3) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { /* ignore */ }
+        }
+
+        function soundClick() { playTone(800, 0.08, 'sine', 0.2); }
+
+        function soundCorrect() {
+            playTone(523, 0.15, 'sine', 0.25);
+            setTimeout(() => playTone(659, 0.15, 'sine', 0.25), 150);
+            setTimeout(() => playTone(784, 0.2, 'sine', 0.3), 300);
+        }
+
+        function soundWrong() { playTone(300, 0.3, 'sawtooth', 0.15); }
+
+        function soundLetter() {
+            playTone(523, 0.12, 'sine', 0.25);
+            setTimeout(() => playTone(659, 0.12, 'sine', 0.25), 120);
+            setTimeout(() => playTone(784, 0.12, 'sine', 0.25), 240);
+            setTimeout(() => playTone(1047, 0.3, 'sine', 0.3), 360);
+        }
+
+        function soundVictory() {
+            const notes = [523, 587, 659, 784, 880, 988, 1047];
+            notes.forEach((n, i) => setTimeout(() => playTone(n, 0.15, 'sine', 0.25), i * 120));
+        }
+
+        function soundCompressor() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.value = 55;
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
+            } catch (e) { /* ignore */ }
+        }
+
+        // ================================================================
+        //  ОЗВУЧКА (Web Speech API)
+        // ================================================================
+        let speechSynth = window.speechSynthesis;
+        let speechUtterance = null;
+        let isSpeaking = false;
+
+        function speakText(text, callback) {
+            if (!soundEnabled) {
+                if (callback) callback();
+                return;
+            }
+            try {
+                if (speechSynth.speaking) {
+                    speechSynth.cancel();
+                }
+                speechUtterance = new SpeechSynthesisUtterance(text);
+                speechUtterance.lang = 'de-DE';
+                speechUtterance.rate = 0.9;
+                speechUtterance.pitch = 0.7;
+                speechUtterance.volume = 1;
+                const voices = speechSynth.getVoices();
+                const maleVoice = voices.find(v => v.lang.startsWith('de') &&
+                    (v.name.toLowerCase().includes('michael') ||
+                        v.name.toLowerCase().includes('alex') ||
+                        v.name.toLowerCase().includes('markus')));
+                if (maleVoice) {
+                    speechUtterance.voice = maleVoice;
+                } else {
+                    const deVoice = voices.find(v => v.lang.startsWith('de'));
+                    if (deVoice) speechUtterance.voice = deVoice;
+                }
+                speechUtterance.onend = function() {
+                    isSpeaking = false;
+                    if (callback) callback();
+                };
+                speechUtterance.onerror = function(e) {
+                    console.warn('Speech error:', e);
+                    isSpeaking = false;
+                    if (callback) callback();
+                };
+                isSpeaking = true;
+                speechSynth.speak(speechUtterance);
+            } catch (e) {
+                console.warn('Speech synthesis error:', e);
+                if (callback) callback();
+            }
+        }
+
+        if (speechSynth) {
+            speechSynth.getVoices();
+            speechSynth.onvoiceschanged = () => { speechSynth.getVoices(); };
+        }
+
+        document.getElementById('soundToggle').addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            this.textContent = soundEnabled ? '🔊 Sound an' : '🔇 Sound aus';
+            if (soundEnabled) {
+                soundClick();
+                setTimeout(() => soundCompressor(), 200);
+                if (speechUtterance && isSpeaking) {
+                    speechSynth.resume();
+                }
+            } else {
+                if (speechSynth.speaking) {
+                    speechSynth.cancel();
+                }
+                isSpeaking = false;
+            }
+        });
+
+        // ================================================================
+        //  DATA
+        // ================================================================
+        const stationsData = [
+            { id: 0, title: 'Bauteile zuordnen', icon: '🔧', letter: 'K' },
+            { id: 1, title: 'Fehlercodes', icon: '⚠️', letter: 'Ä' },
+            { id: 2, title: 'Chat mit Kollegen', icon: '💬', letter: 'L' },
+            { id: 3, title: 'Chat mit Chef', icon: '💬', letter: 'T' },
+            { id: 4, title: 'Servicebericht (Perfekt)', icon: '📋', letter: 'E' }
+        ];
+
+        // ================================================================
+        //  STATE
+        // ================================================================
+        let currentStation = 0;
+        let completed = [false, false, false, false, false];
+        let codeLetters = ['_', '_', '_', '_', '_'];
+        let progress = 0;
+        let isWaitingForOverlay = false;
+        let nextTargetStation = 0;
+        let callAnswered = false;
+
+        const legendSlide = document.getElementById('legendSlide');
+        const stationSlides = document.getElementById('stationSlides');
+        const finalSlide = document.getElementById('finalSlide');
+        const startBtn = document.getElementById('startBtn');
+        const codeBadge = document.getElementById('codeBadge');
+        const progressText = document.getElementById('progressText');
+        const slideWrapper = document.getElementById('slideWrapper');
+        const overlay = document.getElementById('letterOverlay');
+        const bigLetter = document.getElementById('bigLetterDisplay');
+        const nextStationBtn = document.getElementById('nextStationBtn');
+
+        const answerBtn = document.getElementById('answerBtn');
+        const callStatus = document.getElementById('callStatus');
+        const callTimer = document.getElementById('callTimer');
+        const storyText = document.getElementById('storyText');
+        const storyContent = document.getElementById('storyContent');
+        const typingCursor = document.getElementById('typingCursor');
+
+        // ================================================================
+        //  СЛАЙД 0: ТЕЛЕФОН
+        // ================================================================
+        let callTimerValue = 5;
+        let callInterval = null;
+        let storyFullText = '';
+
+        const storyParts = [
+            'Anruf von Chefkoch Müller aus dem Restaurant "Zum goldenen Löwen". ',
+            'Die Kälteanlage ist ausgefallen! Die Temperatur steigt gefährlich. ',
+            'Auf dem Display blinkt der Fehlercode ',
+            'E5',
+            ' – der Kompressor läuft dauerhaft. ',
+            'Die gesamte Fischlieferung ist in Gefahr! ',
+            'Sie müssen sofort handeln und die Anlage reparieren!'
+        ];
+
+        function startCall() {
+            callTimerValue = 5;
+            callTimer.textContent = '00:05';
+            callStatus.textContent = '📳 Klingelt ...';
+            answerBtn.disabled = false;
+            callInterval = setInterval(() => {
+                callTimerValue--;
+                callTimer.textContent = `00:0${callTimerValue}`;
+                if (callTimerValue <= 3 && callTimerValue > 0) {
+                    callStatus.textContent = '📞 Verbinde ...';
+                }
+                if (callTimerValue === 0) {
+                    clearInterval(callInterval);
+                    callStatus.textContent = '⏰ Verpasst!';
+                    answerBtn.disabled = true;
+                    setTimeout(() => {
+                        showStory();
+                    }, 500);
+                }
+            }, 1000);
+        }
+
+        function answerCall() {
+            if (callAnswered) return;
+            callAnswered = true;
+            clearInterval(callInterval);
+            callStatus.textContent = '✅ Verbunden!';
+            answerBtn.disabled = true;
+            soundClick();
+            setTimeout(() => {
+                showStory();
+            }, 300);
+        }
+
+        function showStory() {
+            storyText.style.display = 'block';
+            storyFullText = storyParts.join('');
+            speakText(storyFullText, () => {
+                startBtn.style.display = 'inline-block';
+                startBtn.disabled = false;
+                soundClick();
+            });
+            let index = 0;
+            storyContent.textContent = '';
+            typingCursor.style.display = 'inline-block';
+
+            function typeChar() {
+                if (index < storyFullText.length) {
+                    const char = storyFullText[index];
+                    storyContent.textContent += char;
+                    index++;
+                    if (storyContent.textContent.includes('E5')) {
+                        const e5Index = storyContent.textContent.indexOf('E5');
+                        if (e5Index >= 0) {
+                            const html = storyContent.textContent.substring(0, e5Index) +
+                                '<span class="highlight">E5</span>' +
+                                storyContent.textContent.substring(e5Index + 2);
+                            storyContent.innerHTML = html;
+                        }
+                    }
+                    const delay = char === ' ' ? 50 : 35;
+                    setTimeout(typeChar, delay);
+                } else {
+                    typingCursor.style.display = 'none';
+                }
+            }
+            setTimeout(typeChar, 400);
+        }
+
+        answerBtn.addEventListener('click', answerCall);
+        startCall();
+
+        // ================================================================
+        //  КНОПКА ВЫХОДА (только на финальном слайде)
+        // ================================================================
+        function exitGame() {
+            if (confirm('Möchten Sie das Spiel wirklich beenden?')) {
+                alert('👋 Das Spiel wurde beendet. Vielen Dank fürs Spielen!');
+                location.reload();
+            }
+        }
+
+        document.getElementById('exitGameBtn').addEventListener('click', exitGame);
+
+        // ================================================================
+        //  HELPERS
+        // ================================================================
+        function updateUI() {
+            let str = codeLetters.join(' ');
+            if (progress === 5) str = 'K Ä L T E';
+            codeBadge.textContent = str;
+            progressText.textContent = progress;
+        }
+
+        function showLetterOverlay(letter, stationIdx) {
+            soundLetter();
+            bigLetter.textContent = letter;
+            nextTargetStation = stationIdx + 1;
+            overlay.classList.add('show');
+            nextStationBtn.onclick = function() {
+                soundClick();
+                overlay.classList.remove('show');
+                isWaitingForOverlay = false;
+                if (progress === 5) {
+                    showFinalSlide();
+                    return;
+                }
+                if (nextTargetStation < 5) {
+                    currentStation = nextTargetStation;
+                    renderStation(currentStation);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+        }
+
+        // ================================================================
+        //  STATION 1: РЕАЛИСТИЧНЫЕ КАРТИНКИ (SVG)
+        // ================================================================
+        const equipmentSVG = [
+            // 1. Компрессор
+            `<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="c1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4a8aba"/><stop offset="100%" stop-color="#1a4a6a"/></linearGradient></defs>
+                <rect x="30" y="25" width="140" height="80" rx="14" fill="url(#c1)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))"/>
+                <rect x="42" y="38" width="116" height="54" rx="10" fill="#5a9aba"/>
+                <ellipse cx="100" cy="65" rx="24" ry="18" fill="#ff6b6b" stroke="#cc3333" stroke-width="2">
+                    <animate attributeName="ry" values="18;14;18" dur="0.8s" repeatCount="indefinite"/>
+                </ellipse>
+                <g transform="translate(155, 45)">
+                    <circle cx="0" cy="0" r="20" fill="#2a4a5a" stroke="#4a6a7a" stroke-width="2"/>
+                    <circle cx="0" cy="0" r="5" fill="#6a8a9a"/>
+                    <g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="2s" repeatCount="indefinite"/>
+                    <ellipse cx="0" cy="0" rx="16" ry="4" fill="#5a7a8a" opacity="0.7" transform="rotate(45)"/>
+                    <ellipse cx="0" cy="0" rx="16" ry="4" fill="#5a7a8a" opacity="0.7" transform="rotate(135)"/></g>
+                </g>
+                <rect x="18" y="50" width="14" height="28" rx="4" fill="#6a8a9a"/>
+                <rect x="168" y="50" width="14" height="28" rx="4" fill="#6a8a9a"/>
+            </svg>`,
+            // 2. Конденсатор
+            `<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="c2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0b050"/><stop offset="100%" stop-color="#b87020"/></linearGradient></defs>
+                <rect x="20" y="18" width="160" height="80" rx="12" fill="url(#c2)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))"/>
+                <rect x="32" y="30" width="136" height="8" rx="3" fill="#f8c060"/>
+                <rect x="32" y="42" width="136" height="8" rx="3" fill="#f8c060"/>
+                <rect x="32" y="54" width="136" height="8" rx="3" fill="#f8c060"/>
+                <rect x="32" y="66" width="136" height="8" rx="3" fill="#f8c060"/>
+                <rect x="32" y="78" width="136" height="8" rx="3" fill="#f8c060"/>
+                <rect x="12" y="40" width="10" height="36" rx="4" fill="#8a7a5a"/>
+                <rect x="178" y="40" width="10" height="36" rx="4" fill="#8a7a5a"/>
+                <g transform="translate(100, 115)">
+                    <circle cx="0" cy="0" r="22" fill="#2a4a5a" stroke="#4a6a7a" stroke-width="2"/>
+                    <circle cx="0" cy="0" r="6" fill="#6a8a9a"/>
+                    <g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1.5s" repeatCount="indefinite"/>
+                    <ellipse cx="0" cy="0" rx="18" ry="5" fill="#5a7a8a" opacity="0.7" transform="rotate(30)"/>
+                    <ellipse cx="0" cy="0" rx="18" ry="5" fill="#5a7a8a" opacity="0.7" transform="rotate(120)"/></g>
+                </g>
+            </svg>`,
+            // 3. Испаритель
+            `<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="c3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#5aaaca"/><stop offset="100%" stop-color="#2a6a8a"/></linearGradient></defs>
+                <rect x="25" y="12" width="150" height="90" rx="12" fill="url(#c3)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))"/>
+                <path d="M40 38 Q70 16 85 40 Q100 64 125 48 Q145 36 155 48" stroke="#a0d8f0" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M40 60 Q70 38 85 62 Q100 86 125 70 Q145 58 155 70" stroke="#a0d8f0" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M40 82 Q70 60 85 84 Q100 108 125 92 Q145 80 155 92" stroke="#a0d8f0" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <circle r="6" fill="#c8e8f8" opacity="0.8"><animateMotion dur="3s" repeatCount="indefinite" path="M40 38 Q70 16 85 40 Q100 64 125 48 Q145 36 155 48"/></circle>
+                <circle r="6" fill="#c8e8f8" opacity="0.6"><animateMotion dur="3s" repeatCount="indefinite" begin="1s" path="M40 60 Q70 38 85 62 Q100 86 125 70 Q145 58 155 70"/></circle>
+                <circle r="6" fill="#c8e8f8" opacity="0.6"><animateMotion dur="3s" repeatCount="indefinite" begin="2s" path="M40 82 Q70 60 85 84 Q100 108 125 92 Q145 80 155 92"/></circle>
+                <circle cx="55" cy="32" r="5" fill="#d8ecf8" opacity="0.6"><animate attributeName="opacity" values="0.6;0.9;0.6" dur="1.5s" repeatCount="indefinite"/></circle>
+                <circle cx="110" cy="58" r="5" fill="#d8ecf8" opacity="0.6"><animate attributeName="opacity" values="0.6;0.9;0.6" dur="1.8s" repeatCount="indefinite"/></circle>
+            </svg>`,
+            // 4. Расширительный вентиль
+            `<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="c4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9aaaba"/><stop offset="100%" stop-color="#5a6a7a"/></linearGradient></defs>
+                <rect x="55" y="18" width="90" height="88" rx="12" fill="url(#c4)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))"/>
+                <rect x="68" y="34" width="64" height="26" rx="6" fill="#6a7a8a"/>
+                <circle cx="100" cy="70" r="20" fill="#ff6b6b" stroke="#aa2222" stroke-width="2">
+                    <animate attributeName="r" values="20;18;20" dur="1s" repeatCount="indefinite"/>
+                </circle>
+                <rect x="94" y="66" width="12" height="8" rx="3" fill="#ff4444">
+                    <animate attributeName="y" values="66;68;66" dur="1s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="68" y="18" width="10" height="62" rx="4" fill="#5a6a7a"/>
+                <rect x="122" y="18" width="10" height="62" rx="4" fill="#5a6a7a"/>
+                <rect x="38" y="106" width="124" height="14" rx="5" fill="#7a8a9a"/>
+                <circle cx="138" cy="62" r="10" fill="#4a6a8a" stroke="#6a8aaa" stroke-width="2"/>
+            </svg>`,
+            // 5. Трубопровод
+            `<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="c5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9aaaba"/><stop offset="100%" stop-color="#6a7a8a"/></linearGradient></defs>
+                <rect x="12" y="50" width="176" height="28" rx="14" fill="url(#c5)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))"/>
+                <rect x="12" y="54" width="176" height="8" rx="4" fill="#b0c0d0" opacity="0.5"/>
+                <circle r="8" fill="#6a9aba" opacity="0.6"><animateMotion dur="4s" repeatCount="indefinite" path="M20 64 L180 64"/></circle>
+                <circle r="8" fill="#6a9aba" opacity="0.4"><animateMotion dur="4s" repeatCount="indefinite" begin="1.5s" path="M20 64 L180 64"/></circle>
+                <circle r="8" fill="#6a9aba" opacity="0.4"><animateMotion dur="4s" repeatCount="indefinite" begin="3s" path="M20 64 L180 64"/></circle>
+                <rect x="44" y="18" width="24" height="64" rx="8" fill="url(#c5)"/>
+                <rect x="132" y="18" width="24" height="64" rx="8" fill="url(#c5)"/>
+                <rect x="34" y="78" width="132" height="16" rx="6" fill="#7a8a9a"/>
+                <g><rect x="86" y="24" width="28" height="38" rx="6" fill="#6a7a8a"/>
+                <circle cx="100" cy="28" r="8" fill="#ff6b6b" stroke="#cc3333" stroke-width="1.5">
+                    <animate attributeName="r" values="8;7;8" dur="1.2s" repeatCount="indefinite"/>
+                </circle></g>
+            </svg>`
+        ];
+
+        function renderStation1() {
+            const done = completed[0];
+            const words = ['der Verdichter', 'der Kondensator', 'der Verdampfer', 'das Expansionsventil', 'die Rohrleitung'];
+
+            let html = `
+                <div class="slide-title"><span class="emoji-big">${stationsData[0].icon}</span> ${stationsData[0].title}</div>
+                <div class="task-box">Ziehen Sie die richtigen Begriffe zu den animierten Bildern der Bauteile.</div>
+                <div class="equipment-grid" id="equipGrid">
+            `;
+            for (let i = 0; i < 5; i++) {
+                const filled = done ? words[i] : '';
+                const cls = done ? 'eq-drop-zone filled' : 'eq-drop-zone';
+                html += `
+                    <div class="equipment-item">
+                        <div class="eq-image">${equipmentSVG[i]}</div>
+                        <div class="${cls}" data-slot="${i}" id="slot-${i}">
+                            <span id="slotText-${i}">${filled}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            if (!done) {
+                html += `<div class="drag-words-row" id="dragWords">`;
+                words.forEach((w, idx) => {
+                    html += `<span class="drag-word" data-word="${w}" draggable="true" id="drag-${idx}">${w}</span>`;
+                });
+                html += `</div>`;
+            } else {
+                html += `<div style="color:#4CAF50; margin:10px 0; font-weight:600;">✅ Alle Bauteile richtig zugeordnet!</div>`;
+            }
+            html += `<div class="feedback-msg-blue ${done ? 'success' : ''}" id="feedback-0">${done ? '✅ ' + stationsData[0].letter + ' freigeschaltet!' : '🔹 Ziehen Sie jedes Wort in das richtige Feld.'}</div>`;
+            html += `<button class="next-btn-blue" id="nextBtn-0" ${done ? '' : 'disabled'}>➡️ Nächste Station</button>`;
+
+            stationSlides.innerHTML = html;
+            stationSlides.style.display = 'flex';
+            updateUI();
+
+            if (!done) {
+                setTimeout(() => initDragDropEquip(), 100);
+            }
+            document.getElementById('nextBtn-0')?.addEventListener('click', () => { soundClick();
+                handleNext(0); });
+        }
+
+        function initDragDropEquip() {
+            const dragWords = document.querySelectorAll('.drag-word');
+            const slots = document.querySelectorAll('.eq-drop-zone');
+            if (!dragWords.length || !slots.length) return;
+
+            dragWords.forEach(dw => {
+                dw.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', dw.dataset.word);
+                    dw.classList.add('dragging');
+                });
+                dw.addEventListener('dragend', () => dw.classList.remove('dragging'));
+            });
+
+            slots.forEach(slot => {
+                slot.addEventListener('dragover', (e) => { e.preventDefault();
+                    slot.classList.add('drag-over'); });
+                slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+                slot.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    slot.classList.remove('drag-over');
+                    const word = e.dataTransfer.getData('text/plain');
+                    const slotIdx = parseInt(slot.dataset.slot);
+                    const expected = ['der Verdichter', 'der Kondensator', 'der Verdampfer', 'das Expansionsventil',
+                        'die Rohrleitung'
+                    ][slotIdx];
+                    if (word === expected) {
+                        soundCorrect();
+                        document.getElementById(`slotText-${slotIdx}`).textContent = word;
+                        slot.classList.add('filled');
+                        document.querySelectorAll('.drag-word').forEach(d => {
+                            if (d.dataset.word === word) d.classList.add('placed');
+                        });
+                        const allSlots = document.querySelectorAll('.eq-drop-zone');
+                        let allFilled = true;
+                        allSlots.forEach(s => { if (!s.classList.contains('filled')) allFilled = false; });
+                        if (allFilled) {
+                            completed[0] = true;
+                            progress++;
+                            codeLetters[0] = stationsData[0].letter;
+                            document.getElementById('feedback-0').textContent = '✅ Alle Bauteile richtig! ' + stationsData[0]
+                                .letter + ' freigeschaltet!';
+                            document.getElementById('feedback-0').className = 'feedback-msg-blue success';
+                            document.getElementById('nextBtn-0').disabled = false;
+                            updateUI();
+                            isWaitingForOverlay = true;
+                            setTimeout(() => showLetterOverlay(stationsData[0].letter, 0), 400);
+                        }
+                    } else {
+                        soundWrong();
+                        slot.style.borderColor = '#e53935';
+                        setTimeout(() => { slot.style.borderColor = '#6a9ab8'; }, 800);
+                    }
+                });
+            });
+        }
+
+        // ================================================================
+        //  STATION 2: ДИСПЛЕЙ
+        // ================================================================
+        let st2State = { selectedErr: null, selectedAction: null, matched: [false, false, false], currentErrorIdx: 0 };
+        const errorData = [
+            { code: 'E1', display: 'Temperatursensor Kühlraum defekt', action: 'Sensor im Kühlraum ersetzen', correct: 'B' },
+            { code: 'E3', display: 'Tür des Geräts nicht richtig geschlossen', action: 'Türdichtung prüfen', correct: 'C' },
+            { code: 'F5', display: 'Fehler im elektronischen Steuermodul', action: 'Steuermodul neu programmieren',
+                correct: 'D' }
+        ];
+        const actionOptions = [
+            { id: 'A', label: 'Kondensator prüfen' },
+            { id: 'B', label: 'Sensor im Kühlraum ersetzen' },
+            { id: 'C', label: 'Türdichtung prüfen' },
+            { id: 'D', label: 'Steuermodul neu programmieren' }
+        ];
+
+        function renderStation2() {
+            const done = completed[1];
+            let html = `
+                <div class="slide-title"><span class="emoji-big">${stationsData[1].icon}</span> ${stationsData[1].title}</div>
+                <div class="task-box">Das Display zeigt einen Fehlercode. Ordnen Sie die richtige Lösung zu.</div>
+                <div class="display-container" id="displayContainer">
+                    <span class="display-text ${done ? 'success' : ''}" id="displayCode">${done ? '✅' : errorData[st2State.currentErrorIdx].code}</span>
+                </div>
+                <div class="error-panel">
+                    <div class="col"><div class="col-title">⚠️ Fehler</div>`;
+            errorData.forEach((err, idx) => {
+                const matched = st2State.matched[idx];
+                const selected = st2State.selectedErr === idx && !matched;
+                html += `
+                    <div class="error-item ${matched ? 'matched' : ''} ${selected ? 'selected' : ''}" 
+                         data-err="${idx}" id="errItem-${idx}">
+                        ${err.display} ${matched ? '✅' : ''}
+                    </div>
+                `;
+            });
+            html += `</div><div class="col"><div class="col-title">🔧 Lösung</div>`;
+            actionOptions.forEach((act) => {
+                const used = st2State.matched.some((m, i) => m && errorData[i].correct === act.id);
+                const isSelected = st2State.selectedAction === act.id;
+                html += `
+                    <div class="action-item ${used ? 'matched-action' : ''} ${isSelected && !used ? 'selected-action' : ''}" 
+                         data-action="${act.id}" id="action-${act.id}">
+                        ${act.label} ${used ? '✅' : ''}
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+            html += `<div class="feedback-msg-blue" id="feedback-1">🔹 Wählen Sie einen Fehler und dann die passende Lösung.</div>`;
+            html += `<button class="next-btn-blue" id="nextBtn-1" ${done ? '' : 'disabled'}>➡️ Nächste Station</button>`;
+            stationSlides.innerHTML = html;
+            stationSlides.style.display = 'flex';
+            updateUI();
+            if (!done) {
+                setTimeout(() => initStation2(), 100);
+            }
+            document.getElementById('nextBtn-1')?.addEventListener('click', () => { soundClick();
+                handleNext(1); });
+        }
+
+        function initStation2() {
+            st2State = { selectedErr: null, selectedAction: null, matched: [false, false, false], currentErrorIdx: 0 };
+            const errItems = document.querySelectorAll('.error-item');
+            const actionItems = document.querySelectorAll('.action-item');
+
+            function updateDisplay() {
+                const current = errorData[st2State.currentErrorIdx];
+                document.getElementById('displayCode').textContent = current.code;
+                document.getElementById('feedback-1').textContent =
+                    `🔹 Fehler: ${current.display}. Wählen Sie die passende Lösung.`;
+                document.getElementById('feedback-1').className = 'feedback-msg-blue';
+            }
+
+            function findNextError() {
+                for (let i = 0; i < st2State.matched.length; i++) {
+                    if (!st2State.matched[i]) return i;
+                }
+                return -1;
+            }
+
+            errItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    soundClick();
+                    if (this.classList.contains('matched')) return;
+                    document.querySelectorAll('.error-item').forEach(e => e.classList.remove('selected'));
+                    this.classList.add('selected');
+                    st2State.selectedErr = parseInt(this.dataset.err);
+                    const err = errorData[st2State.selectedErr];
+                    document.getElementById('displayCode').textContent = err.code;
+                    document.getElementById('feedback-1').textContent =
+                        `🔹 Fehler: ${err.display}. Wählen Sie die passende Lösung.`;
+                    document.getElementById('feedback-1').className = 'feedback-msg-blue';
+                });
+            });
+
+            actionItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    soundClick();
+                    if (this.classList.contains('matched-action')) return;
+                    const actionId = this.dataset.action;
+                    const used = st2State.matched.some((m, i) => m && errorData[i].correct === actionId);
+                    if (used) {
+                        document.getElementById('feedback-1').textContent = '⚠️ Diese Lösung wurde bereits verwendet.';
+                        document.getElementById('feedback-1').className = 'feedback-msg-blue error';
+                        return;
+                    }
+                    if (st2State.selectedErr === null) {
+                        document.getElementById('feedback-1').textContent = '⚠️ Wählen Sie zuerst einen Fehler aus.';
+                        document.getElementById('feedback-1').className = 'feedback-msg-blue error';
+                        return;
+                    }
+                    const errIdx = st2State.selectedErr;
+                    if (st2State.matched[errIdx]) {
+                        document.getElementById('feedback-1').textContent = '⚠️ Dieser Fehler ist schon zugeordnet.';
+                        document.getElementById('feedback-1').className = 'feedback-msg-blue error';
+                        return;
+                    }
+                    const currentCode = errorData[st2State.currentErrorIdx].code;
+                    const selectedErrorCode = errorData[errIdx].code;
+                    if (selectedErrorCode !== currentCode) {
+                        soundWrong();
+                        document.getElementById(`errItem-${errIdx}`).classList.add('wrong');
+                        this.classList.add('wrong-action');
+                        document.getElementById('feedback-1').textContent =
+                            `❌ Falscher Fehler! Der aktuelle Code ist ${currentCode}. Wählen Sie den passenden Fehler.`;
+                        document.getElementById('feedback-1').className = 'feedback-msg-blue error';
+                        setTimeout(() => {
+                            document.getElementById(`errItem-${errIdx}`).classList.remove('wrong');
+                            this.classList.remove('wrong-action');
+                            document.getElementById('feedback-1').className = 'feedback-msg-blue';
+                            updateDisplay();
+                        }, 1200);
+                        return;
+                    }
+                    const correct = errorData[errIdx].correct;
+                    if (actionId === correct) {
+                        soundCorrect();
+                        st2State.matched[errIdx] = true;
+                        document.getElementById(`errItem-${errIdx}`).classList.add('matched');
+                        document.getElementById(`errItem-${errIdx}`).classList.remove('selected');
+                        document.getElementById(`action-${actionId}`).classList.add('matched-action');
+                        document.getElementById('feedback-1').textContent = `✅ Fehler ${errIdx+1} richtig zugeordnet!`;
+                        document.getElementById('feedback-1').className = 'feedback-msg-blue success';
+                        st2State.selectedErr = null;
+                        st2State.selectedAction = null;
+                        document.querySelectorAll('.error-item').forEach(e => e.classList.remove('selected'));
+                        document.querySelectorAll('.action-item').forEach(a => a.classList.remove('selected-action'));
+                        const next = findNextError();
+                        if (next !== -1) {
+                            st2State.currentErrorIdx = next;
+                            updateDisplay();
+                        }
+                        if (st2State.matched.every(v => v === true)) {
+                            completed[1] = true;
+                            progress++;
+                            codeLetters[1] = stationsData[1].letter;
+                            document.getElementById('feedback-1').textContent = '✅ Alle Fehler zugeordnet! ' + stationsData[1]
+                                .letter + ' freigeschaltet!';
+                            document.getElementById('feedback-1').className = 'feedback-msg-blue success';
+                            document.getElementById('nextBtn-1').disabled = false;
+                            document.getElementById('displayCode').textContent = '✅';
+                            document.getElementById('displayCode').className = 'display-text success';
+                            updateUI();
+                            isWaitingForOverlay = true;
+                            setTimeout(() => showLetterOverlay(stationsData[1].letter, 1), 400);
+                        }
+                    } else {
+                        soundWrong();
+                        document.getElementById(`action-${actionId}`).classList.add('wrong-action');
+                        document.getElementById('feedback-1').textContent =
+                            `❌ Falsche Lösung für Code ${currentCode}. Versuchen Sie es nochmal.`;
+                        document.getElementById('feedback-1').className = 'feedback-msg-blue error';
+                        setTimeout(() => {
+                            document.getElementById(`action-${actionId}`).classList.remove('wrong-action');
+                            document.getElementById('feedback-1').className = 'feedback-msg-blue';
+                            updateDisplay();
+                        }, 1200);
+                    }
+                });
+            });
+        }
+
+        // ================================================================
+        //  STATION 3: ЧАТ с коллегой (с подсказкой)
+        // ================================================================
+        function renderStation3() {
+            const done = completed[2];
+            let html = `
+                <div class="slide-title"><span class="emoji-big">${stationsData[2].icon}</span> ${stationsData[2].title}</div>
+                <div class="task-box">Schreiben Sie Ihrem Kollegen, welche Werkzeuge er bringen soll.</div>
+                <div class="tool-list-blue"><strong>🛠️ Werkzeuge:</strong> der Lötbrenner, die Vakuumpumpe, das Lecksuchgerät, das Manometer</div>
+                <div class="phone-real">
+                    <div class="phone-notch"><span>📶</span><div class="notch-center"></div><span>🔋</span></div>
+                    <div class="phone-screen">
+                        <div class="chat-header">
+                            <span class="avatar">👷</span>
+                            <span class="name">Kollege</span>
+                            <span class="status">● online</span>
+                        </div>
+                        <div class="chat-messages" id="chatMessages3">
+                            <div class="msg boss">👨‍🔧 Chef: Bring die Werkzeuge für die Reparatur mit!</div>
+                            ${done ? '<div class="msg me">✅ Ich bringe: den Lötbrenner, die Vakuumpumpe, das Lecksuchgerät und das Manometer.</div>' : ''}
+                            ${done ? '<div class="msg system">✅ Nachricht gesendet! ' + stationsData[2].letter + ' freigeschaltet!</div>' : ''}
+                        </div>
+                        ${!done ? `
+                        <div class="chat-hint" id="hint3">
+                            💡 <strong>Tipp:</strong> Verwenden Sie die Werkzeuge im <strong>Akkusativ</strong> mit den richtigen Artikeln:<br>
+                            <strong>den</strong> Lötbrenner, <strong>die</strong> Vakuumpumpe, <strong>das</strong> Lecksuchgerät, <strong>das</strong> Manometer
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput3" placeholder="Nachricht schreiben ..." />
+                            <button id="chatSend3">📤 Senden</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="feedback-msg-blue ${done ? 'success' : ''}" id="feedback-2">${done ? '✅ ' + stationsData[2].letter + ' freigeschaltet!' : '🔹 Schreiben Sie eine Nachricht mit allen 4 Werkzeugen im Akkusativ.'}</div>
+                <button class="next-btn-blue" id="nextBtn-2" ${done ? '' : 'disabled'}>➡️ Nächste Station</button>
+            `;
+            stationSlides.innerHTML = html;
+            stationSlides.style.display = 'flex';
+            updateUI();
+
+            if (!done) {
+                document.getElementById('chatSend3')?.addEventListener('click', function() {
+                    soundClick();
+                    const input = document.getElementById('chatInput3');
+                    const msg = input.value.trim();
+                    const required = [
+                        { article: 'den', word: 'lötbrenner' },
+                        { article: 'die', word: 'vakuumpumpe' },
+                        { article: 'das', word: 'lecksuchgerät' },
+                        { article: 'das', word: 'manometer' }
+                    ];
+                    const lowerMsg = msg.toLowerCase();
+                    let allFound = true;
+                    for (let req of required) {
+                        const pattern = req.article + ' ' + req.word;
+                        if (!lowerMsg.includes(pattern)) {
+                            allFound = false;
+                            break;
+                        }
+                    }
+                    if (allFound && msg.length > 10) {
+                        soundCorrect();
+                        completed[2] = true;
+                        progress++;
+                        codeLetters[2] = stationsData[2].letter;
+                        document.getElementById('feedback-2').textContent = '✅ Perfekt! ' + stationsData[2].letter +
+                            ' freigeschaltet!';
+                        document.getElementById('feedback-2').className = 'feedback-msg-blue success';
+                        document.getElementById('nextBtn-2').disabled = false;
+                        const chatArea = document.getElementById('chatMessages3');
+                        chatArea.innerHTML += `<div class="msg me">${msg}</div>`;
+                        input.disabled = true;
+                        document.getElementById('chatSend3').disabled = true;
+                        updateUI();
+                        isWaitingForOverlay = true;
+                        setTimeout(() => showLetterOverlay(stationsData[2].letter, 2), 400);
+                    } else {
+                        soundWrong();
+                        document.getElementById('feedback-2').textContent =
+                            '❌ Nicht alle Werkzeuge mit richtigem Artikel (Akkusativ) genannt. Tipp: den Lötbrenner, die Vakuumpumpe, das Lecksuchgerät, das Manometer';
+                        document.getElementById('feedback-2').className = 'feedback-msg-blue error';
+                        setTimeout(() => { document.getElementById('feedback-2').className = 'feedback-msg-blue'; },
+                            1500);
+                    }
+                });
+            }
+            document.getElementById('nextBtn-2')?.addEventListener('click', () => { soundClick();
+                handleNext(2); });
+        }
+
+        // ================================================================
+        //  STATION 4: ЧАТ с шефом
+        // ================================================================
+        let st4State = { stage: 0, answer1: '', answer2: '' };
+
+        function renderStation4() {
+            const done = completed[3];
+            let html = `
+                <div class="slide-title"><span class="emoji-big">${stationsData[3].icon}</span> ${stationsData[3].title}</div>
+                <div class="task-box">Beantworten Sie die Fragen des Chefs im Chat.</div>
+                <div class="phone-real">
+                    <div class="phone-notch"><span>📶</span><div class="notch-center"></div><span>🔋</span></div>
+                    <div class="phone-screen">
+                        <div class="chat-header">
+                            <span class="avatar">👨‍🍳</span>
+                            <span class="name">Chef</span>
+                            <span class="status">● online</span>
+                        </div>
+                        <div class="chat-messages" id="chatMessages4">
+            `;
+            if (done) {
+                html += `
+                    <div class="msg boss">👨‍🍳 Warum läuft der Kompressor dauerhaft?</div>
+                    <div class="msg me">${st4State.answer1 || 'Der Kompressor läuft dauerhaft, weil zu wenig Kältemittel im Kreislauf ist.'}</div>
+                    <div class="msg boss">👨‍🍳 Und warum ist die Kühlung schlecht?</div>
+                    <div class="msg me">${st4State.answer2 || 'Die Kühlung ist schlecht, weil der Verdampfer vereist ist.'}</div>
+                    <div class="msg system">✅ Alle Fragen beantwortet! ${stationsData[3].letter} freigeschaltet!</div>
+                `;
+            } else {
+                if (st4State.stage === 0) {
+                    html += `<div class="msg boss">👨‍🍳 Warum läuft der Kompressor dauerhaft?</div>`;
+                } else if (st4State.stage === 1) {
+                    html += `
+                        <div class="msg boss">👨‍🍳 Warum läuft der Kompressor dauerhaft?</div>
+                        <div class="msg me">${st4State.answer1}</div>
+                        <div class="msg boss">👨‍🍳 Und warum ist die Kühlung schlecht?</div>
+                    `;
+                }
+                html += `
+                        </div>
+                        <div class="chat-hint" id="hint4">
+                            💡 Tipp: Verwenden Sie <strong>weil</strong> + Fachbegriffe:<br>
+                            ${st4State.stage === 0 ? '<strong>Kältemittel</strong> und <strong>Kreislauf</strong>' : '<strong>Verdampfer</strong> und <strong>vereist</strong>'}
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput4" placeholder="Antwort schreiben ..." />
+                            <button id="chatSend4">📤 Senden</button>
+                        </div>
+                `;
+            }
+            html += `
+                    </div>
+                </div>
+                <div class="feedback-msg-blue ${done ? 'success' : ''}" id="feedback-3">${done ? '✅ ' + stationsData[3].letter + ' freigeschaltet!' : '🔹 Beantworten Sie die Frage des Chefs.'}</div>
+                <button class="next-btn-blue" id="nextBtn-3" ${done ? '' : 'disabled'}>➡️ Nächste Station</button>
+            `;
+            stationSlides.innerHTML = html;
+            stationSlides.style.display = 'flex';
+            updateUI();
+
+            if (!done) {
+                document.getElementById('chatSend4').addEventListener('click', function() {
+                    const input = document.getElementById('chatInput4');
+                    const msg = input.value.trim();
+                    if (!msg) return;
+                    soundClick();
+
+                    if (st4State.stage === 0) {
+                        const lower = msg.toLowerCase();
+                        if (lower.includes('weil') && lower.includes('kältemittel') && lower.includes('kreislauf')) {
+                            soundCorrect();
+                            st4State.answer1 = msg;
+                            st4State.stage = 1;
+                            const chat = document.getElementById('chatMessages4');
+                            chat.innerHTML += `<div class="msg me">${msg}</div>`;
+                            chat.innerHTML += `<div class="msg boss">👨‍🍳 Und warum ist die Kühlung schlecht?</div>`;
+                            input.value = '';
+                            document.getElementById('feedback-3').textContent = '🔹 Beantworten Sie die zweite Frage.';
+                            document.getElementById('feedback-3').className = 'feedback-msg-blue';
+                            document.getElementById('hint4').innerHTML =
+                                '💡 Tipp: Verwenden Sie <strong>weil</strong> + <strong>Verdampfer</strong> und <strong>vereist</strong>';
+                            chat.scrollTop = chat.scrollHeight;
+                        } else {
+                            soundWrong();
+                            document.getElementById('feedback-3').textContent =
+                                '❌ Falsch. Verwenden Sie "weil", "Kältemittel" und "Kreislauf".';
+                            document.getElementById('feedback-3').className = 'feedback-msg-blue error';
+                            setTimeout(() => {
+                                document.getElementById('feedback-3').className = 'feedback-msg-blue';
+                                document.getElementById('feedback-3').textContent =
+                                '🔹 Beantworten Sie die erste Frage.';
+                            }, 1500);
+                        }
+                    } else if (st4State.stage === 1) {
+                        const lower = msg.toLowerCase();
+                        if (lower.includes('weil') && lower.includes('verdampfer') && lower.includes('vereist')) {
+                            soundCorrect();
+                            st4State.answer2 = msg;
+                            st4State.stage = 2;
+                            completed[3] = true;
+                            progress++;
+                            codeLetters[3] = stationsData[3].letter;
+                            const chat = document.getElementById('chatMessages4');
+                            chat.innerHTML += `<div class="msg me">${msg}</div>`;
+                            chat.innerHTML +=
+                                `<div class="msg system">✅ Alle Fragen beantwortet! ${stationsData[3].letter} freigeschaltet!</div>`;
+                            input.disabled = true;
+                            document.getElementById('chatSend4').disabled = true;
+                            document.getElementById('feedback-3').textContent = '✅ Perfekt! ' + stationsData[3].letter +
+                                ' freigeschaltet!';
+                            document.getElementById('feedback-3').className = 'feedback-msg-blue success';
+                            document.getElementById('nextBtn-3').disabled = false;
+                            document.getElementById('hint4').innerHTML = '✅ Alle Fragen beantwortet!';
+                            updateUI();
+                            isWaitingForOverlay = true;
+                            setTimeout(() => showLetterOverlay(stationsData[3].letter, 3), 400);
+                        } else {
+                            soundWrong();
+                            document.getElementById('feedback-3').textContent =
+                                '❌ Falsch. Verwenden Sie "weil", "Verdampfer" und "vereist".';
+                            document.getElementById('feedback-3').className = 'feedback-msg-blue error';
+                            setTimeout(() => {
+                                document.getElementById('feedback-3').className = 'feedback-msg-blue';
+                                document.getElementById('feedback-3').textContent =
+                                '🔹 Beantworten Sie die zweite Frage.';
+                            }, 1500);
+                        }
+                    }
+                });
+            }
+            document.getElementById('nextBtn-3')?.addEventListener('click', () => { soundClick();
+                handleNext(3); });
+        }
+
+        // ================================================================
+        //  STATION 5: ОТЧЁТ
+        // ================================================================
+        function renderStation5() {
+            const done = completed[4];
+            let html = `
+                <div class="slide-title"><span class="emoji-big">${stationsData[4].icon}</span> ${stationsData[4].title}</div>
+                <div class="task-box">Füllen Sie den Servicebericht aus. Setzen Sie die Verben im <strong>Perfekt</strong> ein. (Infinitiv in Klammern)</div>
+                <div class="computer">
+                    <div class="monitor">
+                        <div class="report-header">
+                            <span>🔧 KÄLTETECHNIK SERVICE GMBH</span>
+                            <span>Auftrag #2024-08</span>
+                        </div>
+                        <div class="report-body">
+                            <div><span style="color:#8ab4d4;">Datum:</span> 30.07.2026</div>
+                            <div><span style="color:#8ab4d4;">Kunde:</span> Restaurant "Zum goldenen Löwen"</div>
+                            <div style="margin-top:8px; border-top:1px dashed #4a6a7a; padding-top:8px;">
+                                <span style="color:#8ab4d4;">Arbeitsbericht:</span><br>
+                                Ich habe die Rohrleitung 
+                                ${!done ? `<input type="text" id="perfekt1" class="field-input" placeholder="..." style="width:120px;" /> <span class="hint">(löten)</span>` : `<span class="field">gelötet</span>`}
+                                , die Vakuumpumpe 
+                                ${!done ? `<input type="text" id="perfekt2" class="field-input" placeholder="..." style="width:120px;" /> <span class="hint">(anschließen)</span>` : `<span class="field">angeschlossen</span>`}
+                                 und den Fehlercode E5 
+                                ${!done ? `<input type="text" id="perfekt3" class="field-input" placeholder="..." style="width:120px;" /> <span class="hint">(zurücksetzen)</span>` : `<span class="field">zurückgesetzt</span>`}
+                                . Danach habe ich die Wartung 
+                                ${!done ? `<input type="text" id="perfekt4" class="field-input" placeholder="..." style="width:120px;" /> <span class="hint">(durchführen)</span>` : `<span class="field">durchgeführt</span>`}
+                                . Die Anlage funktioniert wieder.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stand"></div>
+                    <div class="base"></div>
+                </div>
+                ${!done ? `<button class="option-btn-blue" id="checkPerfektBtn" style="background:#4a8ab8; color:white; border-color:#4a8ab8; margin-top:10px;">📤 Bericht prüfen</button>` : ''}
+                <div class="feedback-msg-blue ${done ? 'success' : ''}" id="feedback-4">${done ? '✅ ' + stationsData[4].letter + ' freigeschaltet! 🎉 KÄLTE komplett!' : '🔹 Tragen Sie die richtigen Perfekt-Formen ein.'}</div>
+                <button class="next-btn-blue" id="nextBtn-4" ${done ? '' : 'disabled'}>${done ? '🏆 Bericht abschließen' : '➡️ Nächste Station'}</button>
+            `;
+            stationSlides.innerHTML = html;
+            stationSlides.style.display = 'flex';
+            updateUI();
+
+            if (!done) {
+                document.getElementById('checkPerfektBtn')?.addEventListener('click', function() {
+                    soundClick();
+                    const answers = [
+                        document.getElementById('perfekt1').value.trim(),
+                        document.getElementById('perfekt2').value.trim(),
+                        document.getElementById('perfekt3').value.trim(),
+                        document.getElementById('perfekt4').value.trim()
+                    ];
+                    const correctAnswers = ['gelötet', 'angeschlossen', 'zurückgesetzt', 'durchgeführt'];
+                    let allCorrect = true;
+                    answers.forEach((a, idx) => { if (a.toLowerCase() !== correctAnswers[idx].toLowerCase()) allCorrect =
+                            false; });
+                    if (allCorrect) {
+                        soundCorrect();
+                        completed[4] = true;
+                        progress++;
+                        codeLetters[4] = stationsData[4].letter;
+                        document.getElementById('feedback-4').textContent = '✅ Perfekt! ' + stationsData[4].letter +
+                            ' freigeschaltet! 🎉 KÄLTE komplett!';
+                        document.getElementById('feedback-4').className = 'feedback-msg-blue success';
+                        document.getElementById('nextBtn-4').disabled = false;
+                        document.getElementById('nextBtn-4').textContent = '🏆 Bericht abschließen';
+                        updateUI();
+                        isWaitingForOverlay = true;
+                        setTimeout(() => showLetterOverlay(stationsData[4].letter, 4), 400);
+                    } else {
+                        soundWrong();
+                        document.getElementById('feedback-4').textContent =
+                            '❌ Nicht alle Formen sind korrekt. Tipp: gelötet, angeschlossen, zurückgesetzt, durchgeführt';
+                        document.getElementById('feedback-4').className = 'feedback-msg-blue error';
+                        setTimeout(() => { document.getElementById('feedback-4').className = 'feedback-msg-blue'; },
+                            1500);
+                    }
+                });
+            }
+            document.getElementById('nextBtn-4')?.addEventListener('click', () => {
+                soundClick();
+                if (completed[4]) {} else { handleNext(4); }
+            });
+        }
+
+        // ================================================================
+        //  ФИНАЛ
+        // ================================================================
+        function showFinalSlide() {
+            stationSlides.style.display = 'none';
+            finalSlide.classList.remove('hidden');
+            finalSlide.style.display = 'flex';
+            slideWrapper.classList.add('final');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            document.getElementById('checkTranslationBtn').addEventListener('click', function() {
+                const input = document.getElementById('translationInput');
+                const val = input.value.trim().toLowerCase();
+                const resultDiv = document.getElementById('translationResult');
+                const valid = ['холод', 'холодно'];
+                if (valid.includes(val)) {
+                    resultDiv.textContent = '✅ Richtig!';
+                    resultDiv.className = 'result-msg success';
+                    soundCorrect();
+                    showFinalCall();
+                } else {
+                    resultDiv.textContent = '❌ Falsch. Versuchen Sie es nochmal.';
+                    resultDiv.className = 'result-msg error';
+                    soundWrong();
+                }
+            });
+        }
+
+        let finalCallAnswered = false;
+        let finalCallTimerValue = 10;
+        let finalCallInterval = null;
+
+        function showFinalCall() {
+            const container = document.getElementById('finalCallContainer');
+            container.classList.remove('hidden');
+            container.style.display = 'block';
+
+            const status = document.getElementById('finalCallStatus');
+            const timer = document.getElementById('finalCallTimer');
+            const answerBtnFinal = document.getElementById('finalAnswerBtn');
+
+            finalCallTimerValue = 10;
+            timer.textContent = '00:10';
+            status.textContent = '📳 Klingelt ...';
+            answerBtnFinal.disabled = false;
+
+            finalCallInterval = setInterval(() => {
+                finalCallTimerValue--;
+                timer.textContent = `00:${String(finalCallTimerValue).padStart(2, '0')}`;
+                if (finalCallTimerValue <= 5 && finalCallTimerValue > 0) {
+                    status.textContent = '📞 Verbinde ...';
+                }
+                if (finalCallTimerValue === 0) {
+                    clearInterval(finalCallInterval);
+                    status.textContent = '⏰ Verpasst!';
+                    answerBtnFinal.disabled = true;
+                    showThanks();
+                }
+            }, 1000);
+
+            answerBtnFinal.addEventListener('click', function() {
+                if (finalCallAnswered) return;
+                finalCallAnswered = true;
+                clearInterval(finalCallInterval);
+                status.textContent = '✅ Verbunden!';
+                answerBtnFinal.disabled = true;
+                soundClick();
+                setTimeout(() => {
+                    showThanks();
+                }, 400);
+            });
+        }
+
+        function showThanks() {
+            const thanksText = document.getElementById('thanksText');
+            thanksText.style.display = 'block';
+            const content = document.getElementById('thanksContent');
+            const cursor = document.getElementById('thanksCursor');
+
+            const thanksMessage = 'Vielen Dank für Ihre schnelle Hilfe! Die Kühlung läuft wieder einwandfrei. Sie haben uns den Abend gerettet!';
+            speakText(thanksMessage, () => {
+                showPaymentNotification();
+            });
+
+            let index = 0;
+            content.textContent = '';
+            cursor.style.display = 'inline-block';
+
+            function typeThanks() {
+                if (index < thanksMessage.length) {
+                    content.textContent += thanksMessage[index];
+                    index++;
+                    const delay = thanksMessage[index - 1] === ' ' ? 40 : 25;
+                    setTimeout(typeThanks, delay);
+                } else {
+                    cursor.style.display = 'none';
+                }
+            }
+            setTimeout(typeThanks, 300);
+        }
+
+        function showPaymentNotification() {
+            const notif = document.getElementById('paymentNotification');
+            notif.classList.add('show');
+            soundVictory();
+            setTimeout(() => {
+                document.getElementById('victoryOverlay').classList.add('show');
+                soundVictory();
+            }, 3000);
+        }
+
+        // ================================================================
+        //  RENDER DISPATCH
+        // ================================================================
+        function renderStation(index) {
+            switch (index) {
+                case 0:
+                    renderStation1();
+                    break;
+                case 1:
+                    renderStation2();
+                    break;
+                case 2:
+                    renderStation3();
+                    break;
+                case 3:
+                    renderStation4();
+                    break;
+                case 4:
+                    renderStation5();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function handleNext(index) {
+            if (index === 4) return;
+            if (!completed[index]) return;
+            currentStation = index + 1;
+            if (currentStation < 5) {
+                soundClick();
+                renderStation(currentStation);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ================================================================
+        //  START
+        // ================================================================
+        startBtn.addEventListener('click', function() {
+            soundClick();
+            soundCompressor();
+            legendSlide.classList.add('hidden');
+            stationSlides.classList.remove('hidden');
+            stationSlides.style.display = 'flex';
+            currentStation = 0;
+            st2State = { selectedErr: null, selectedAction: null, matched: [false, false, false], currentErrorIdx: 0 };
+            st4State = { stage: 0, answer1: '', answer2: '' };
+            renderStation(0);
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        updateUI();
+        console.log('🧊 Kälteanlagen-Quest Final V5 geladen.');
+    </script>
+</body>
+</html>
